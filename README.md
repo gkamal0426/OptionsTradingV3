@@ -124,7 +124,7 @@ Browser opens automatically at `http://localhost:5000`
 ## 📈 Live Performance
 
 - Tested live with NIFTY options on Kotak Neo
-- PCR data collected daily since May 2026
+- PCR data collected daily since Mar 2026
 - 180+ option chain snapshots per trading day
 - Orders executed in under 1 seconds
 
