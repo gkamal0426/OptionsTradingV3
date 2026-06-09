@@ -6,6 +6,3 @@ process_start_time: "09:00"
 ltp_update:
   ltp_start_time: "09:14"
   ltp_end_time: "15:30"
-users_list:
-  client1: "client1twofa_code"
-  client2: "client2twofa_code"
