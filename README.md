@@ -7,25 +7,25 @@ A professional-grade options trading dashboard built on **Kotak Neo API** with l
 ## 🚀 Features
 
 ### Trading
-- ✅ **Zero Brokerage** — orders via Kotak Neo API
+- ✅ **Zero Brokerage** — orders via Kotak Neo API - Kotak charges 0 brokerage on API orders
 - ✅ **Bulk Order Entry** — place multiple orders in one click
 - ✅ **One-Click Square Off All** — close all positions instantly
 - ✅ **Single & Bulk Order Management**
-- ✅ **Multi-User Support** — manage two accounts simultaneously
+- ✅ **Multi-User Support** — manage two accounts simultaneously - configurable to increase n number of accounts
 
 ### Analytics
-- ✅ **Live PCR Monitor** — Put-Call Ratio tracked every 2 minutes
+- ✅ **Live PCR Monitor** — Put-Call Ratio tracked every 2 minutes - strikes count can be configured
 - ✅ **OI Change Tracking** — Call & Put OI with delta
-- ✅ **Market Direction Signal** — Strong Bullish to Strong Bearish
-- ✅ **Historical OI Data** — auto-saved every 2 minutes, 9:15 AM to 3:30 PM
+- ✅ **Market Direction Signal** — Strong Bullish to Strong Bearish 
+- ✅ **Historical OI Data** — auto-saved every 2 minutes, 9:15 AM to 3:30 PM - batch file runs to download 
 - ✅ **Auto Option Chain Backup** — zipped daily at 3:35 PM
 
 ### Strategy Engine
 - ✅ **Custom Strategy Builder** — up to 8 legs
-- ✅ **Pre-built Strategies** — Short Straddle, Short Strangle, Bull Call Spread
+- ✅ **Pre-built Strategies** — Short Straddle, Short Strangle, Bull Call Spread etc
 - ✅ **Stop Loss** — Combined Points, Combined %, Leg Points, Leg %
 - ✅ **Trailing Stop Loss**
-- ✅ **PANIC Button** — emergency exit all strategies
+- ✅ **PANIC Button** — emergency exit all strategies and all users
 
 ### Reporting & Logs
 - ✅ **Auto Excel Order Reports** — per user, per day
@@ -68,8 +68,9 @@ options-trading-ver3/
 ├── symbol_creation/      ← Symbol & token management
 ├── utils/                ← Shared utilities
 ├── variables/            ← YAML config files
-├── launcher.py           ← App entry point
+├── trading_setup.py           ← App entry point
 └── START_TRADING.bat     ← Windows launcher
+
 ```
 
 ---
@@ -80,6 +81,7 @@ options-trading-ver3/
 - Windows OS
 - Python 3.11
 - Kotak Neo API access
+ 
 
 ### Installation
 ```bash
@@ -93,8 +95,8 @@ get in touch for this
 ```
 
 ### Running
-Double-click `START_TRADING.bat`
-
+- Double-click `START_TRADING.bat`
+- exe file available - so none of above required
 Browser opens automatically at `http://localhost:5000`
 
 ---
@@ -123,7 +125,7 @@ Browser opens automatically at `http://localhost:5000`
 
 ## 📈 Live Performance
 
-- Tested live with NIFTY options on Kotak Neo
+- Working live with NIFTY/BANKNIFTY/SENSEX/MCX options on Kotak Neo 
 - PCR data collected daily since Mar 2026
 - 180+ option chain snapshots per trading day
 - Orders executed in under 1 seconds
