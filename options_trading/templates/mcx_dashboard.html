@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}MCX Trading Dashboard{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mcx_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- ══════════════════════════════════════════════════════
+         TOP STATUS BAR
+         LEFT:
+           [●] timer | [MCX] | Set All[▼] | Index[▼] | Strike[▼] | CE/PE[▼] | [🔍Fetch] | [➕Add] | [🗑Delete] | status
+         RIGHT:
+           💰 margins | user pill
+    ══════════════════════════════════════════════════════ -->
+    <div class="auto-refresh">
+
+        <div class="auto-refresh-left">
+
+            <!-- Live pulse + timestamp -->
+            <span class="refresh-indicator"></span>
+            <span class="bar-text">
+                3s&nbsp;|&nbsp;Last update:&nbsp;<span id="lastUpdate">Never</span>
+            </span>
+
+            <span class="mcx-badge">MCX</span>
+            <span class="bar-divider">|</span>
+
+            <!-- ① Set All Product -->
+            <span class="bar-control-group">
+                <label class="bar-label">Set All:</label>
+                <select id="globalProductSelect"
+                        onchange="setAllProducts(this.value)"
+                        class="global-product-select">
+                    <option value="MIS">MIS</option>
+                    <option value="NRML" selected>NRML</option>
+                    <option value="CNC">CNC</option>
+                    <option value="CO">CO</option>
+                </select>
+            </span>
+
+            <span class="bar-divider">|</span>
+
+            <!-- ② Index Dropdown — static list, no API needed -->
+            <span class="bar-control-group">
+                <label class="bar-label">Index:</label>
+                <select id="indexSelect"
+                        class="index-select"
+                        onchange="onIndexChange()">
+                    <option value="">-- Select --</option>
+                    <option value="CRUDEOIL">CRUDEOIL</option>
+                    <option value="CRUDEOILM">CRUDEOILM</option>
+                    <option value="GOLD">GOLD</option>
+                    <option value="GOLDM">GOLDM</option>
+                    <option value="NATGASMINI">NATGASMINI</option>
+                    <option value="NATURALGAS">NATURALGAS</option>
+                    <option value="SILVER">SILVER</option>
+                    <option value="SILVERM">SILVERM</option>
+                </select>
+            </span>
+
+            <!-- ③ Strike Dropdown — populated after Fetch -->
+            <span class="bar-control-group">
+                <label class="bar-label">Strike:</label>
+                <select id="strikeSelect" class="strike-select" disabled>
+                    <option value="">Select Index first</option>
+                </select>
+            </span>
+
+            <!-- ④ Option Type CE / PE -->
+            <span class="bar-control-group">
+                <label class="bar-label">Type:</label>
+                <select id="optionTypeSelect" class="option-type-select">
+                    <option value="CE">CE</option>
+                    <option value="PE">PE</option>
+                </select>
+            </span>
+
+            <!-- ⑤ FETCH button — loads strikes for chosen index -->
+            <button id="fetchStrikesBtn"
+                    class="bar-action-btn bar-btn-fetch"
+                    onclick="fetchStrikesForIndex()"
+                    title="Load strikes for selected index"
+                    disabled>
+                <span id="fetchStrikesBtnText">🔍 Fetch</span>
+                <span id="fetchStrikesBtnSpinner" class="btn-spinner" style="display:none;"></span>
+            </button>
+
+            <!-- ⑥ ADD button — adds resolved symbol to watchlist -->
+            <button id="addStrikeBtn"
+                    class="bar-action-btn bar-btn-add"
+                    onclick="addStrike()"
+                    title="Add selected strike to MCX watchlist"
+                    disabled>
+                <span id="addStrikeBtnText">➕ Add</span>
+                <span id="addStrikeBtnSpinner" class="btn-spinner" style="display:none;"></span>
+            </button>
+
+            <!-- ⑦ DELETE button — visible only when rows are checked -->
+            <button id="deleteStrikesBtn"
+                    class="bar-action-btn bar-btn-delete"
+                    onclick="deleteCheckedStrikes()"
+                    title="Remove checked strikes from MCX watchlist"
+                    style="display:none;">
+                🗑️ Delete
+            </button>
+
+            <!-- ⑧ Inline feedback -->
+            <span id="strikeActionStatus" class="strike-action-status"></span>
+
+        </div><!-- /auto-refresh-left -->
+
+        <div class="auto-refresh-right">
+            <span class="margin-item">💰 Total: <strong><span id="marginTotal">-</span></strong></span>
+            <span class="margin-divider">|</span>
+            <span class="margin-item">📊 Used: <strong><span id="marginUsed">-</span></strong></span>
+            <span class="margin-divider">|</span>
+            <span class="margin-item margin-balance">Balance: <strong><span id="marginBalance">-</span></strong></span>
+            <span id="userPill" class="user-pill pill-old">Old User</span>
+        </div>
+
+    </div><!-- /auto-refresh -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         MAIN SYMBOL TABLE
+    ══════════════════════════════════════════════════════ -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>☑️</th>
+                    <th>Strike / Contract</th>
+                    <th>Tag</th>
+                    <th>Symbol</th>
+                    <th>Token</th>
+                    <th>LTP</th>
+                    <th>Lots</th>
+                    <th>Type</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                    <th>Exchange</th>
+                    <th>Lot&nbsp;Size</th>
+                </tr>
+            </thead>
+            <tbody id="symbolTable">
+                <tr>
+                    <td colspan="13" class="loading">
+                        <div class="spinner"></div>
+                        Loading MCX symbols…
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div><!-- /container -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     FLOATING BULK ORDER BUTTON
+══════════════════════════════════════════════════════ -->
+<button class="bulk-order-btn" id="bulkOrderBtn" onclick="openBulkOrderModal()">
+    📋 Process Selected
+    <span class="bulk-order-badge" id="selectedCount">0</span>
+</button>
+
+
+<!-- ══════════════════════════════════════════════════════
+     BULK ORDER MODAL
+══════════════════════════════════════════════════════ -->
+<div class="bulk-order-modal" id="bulkOrderModal">
+    <div class="bulk-order-content">
+        <h2>
+            📋 MCX Bulk Order Processing
+            <span class="bulk-refresh-indicator" title="LTP auto-updating">🔄</span>
+            <span id="bulkOrderUser"
+                  style="font-size:14px; font-weight:500; color:#f6ad55; margin-left:15px;"></span>
+        </h2>
+
+        <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">
+            <span style="font-size:12px; color:#718096; font-weight:600;">Set All:</span>
+            <select id="bulkGlobalProduct"
+                    onchange="setBulkAllProducts(this.value)"
+                    class="global-product-select">
+                <option value="MIS">MIS</option>
+                <option value="NRML">NRML</option>
+                <option value="CNC">CNC</option>
+                <option value="CO">CO</option>
+            </select>
+        </div>
+
+        <table class="bulk-order-table">
+            <thead>
+                <tr>
+                    <th>⋮⋮</th>
+                    <th>Symbol</th>
+                    <th>Strike</th>
+                    <th>LTP</th>
+                    <th>Lots</th>
+                    <th>Type</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                    <th>🗑️</th>
+                    <th>Exchange</th>
+                    <th>Lot Size</th>
+                </tr>
+            </thead>
+            <tbody id="bulkOrderTableBody"></tbody>
+        </table>
+
+        <div class="bulk-order-actions">
+            <button class="bulk-btn bulk-btn-cancel" onclick="closeBulkOrderModal()">Cancel</button>
+            <button class="bulk-btn bulk-btn-process" onclick="processBulkOrders()">Process Orders</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SINGLE ORDER CONFIRMATION MODAL
+══════════════════════════════════════════════════════ -->
+<div class="confirm-modal" id="confirmModal">
+    <div class="confirm-content">
+        <h2>⚠️ Confirm MCX Order</h2>
+        <div class="confirm-details">
+            <div class="confirm-row">
+                <span class="confirm-label">User:</span>
+                <span class="confirm-value" id="confirmUser"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Symbol:</span>
+                <span class="confirm-value" id="confirmSymbol"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Strike:</span>
+                <span class="confirm-value" id="confirmStrike"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Action:</span>
+                <span class="confirm-value" id="confirmAction"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Order Type:</span>
+                <span class="confirm-value" id="confirmOrderType"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Product:</span>
+                <span class="confirm-value mcx-product-badge" id="confirmProduct"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Price:</span>
+                <span class="confirm-value" id="confirmPrice"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Lots:</span>
+                <span class="confirm-value" id="confirmLots"></span>
+            </div>
+            <div class="confirm-quantity-highlight">
+                <div class="confirm-row" style="margin-bottom:0;">
+                    <span class="confirm-label">Total Quantity:</span>
+                    <span class="confirm-value" id="confirmQuantity"
+                          style="font-size:16px; color:#d97706;"></span>
+                </div>
+            </div>
+        </div>
+        <div class="confirm-buttons">
+            <button class="confirm-btn confirm-btn-no" onclick="cancelOrder()">Cancel</button>
+            <button class="confirm-btn confirm-btn-yes" onclick="confirmOrder()">Confirm Order</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     RESULT MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal" id="orderModal">
+    <div class="modal-content">
+        <h2 id="modalTitle">✅ Order Confirmation</h2>
+        <p id="orderMessage"></p>
+        <button class="modal-close" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/mcx_dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,55 @@
+# ── Credentials & Secrets ────────────────────────────────────────────────────
+.env
+*.env
+env/
+secrets/
+
+# ── Python cache ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Jupyter Notebook ──────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Logs & Backups (stay on local machine) ───────────────────────────────────
+*.log
+backup/
+app_logs/
+orders_report/
+option_chain/
+exports/
+Exports/
+
+# ── Excel files (user input files, not for repo) ─────────────────────────────
+*.xlsx
+*.xls
+*.csv
+
+# ── Database files ────────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── OS files ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+
+# ── IDE files ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+
+# ── PyInstaller ───────────────────────────────────────────────────────────────
+dist/
+build/
+*.spec

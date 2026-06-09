@@ -1,0 +1,1208 @@
+/* ===================================
+   Positions Page CSS  v2.0
+   Aligned with dashboard.css design system.
+   Tabs: Positions | Trade History | Order Report
+   =================================== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 10px;
+}
+
+/* ── Main Container ── */
+.pos-container {
+    max-width: 1800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: visible;
+}
+
+/* ===================================
+   Status Bar  (mirrors dashboard auto-refresh bar)
+   =================================== */
+.pos-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #edf2f7;
+    font-size: 11px;
+    color: #4a5568;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pos-status-left  { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pos-status-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.refresh-indicator {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #48bb78;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+}
+
+/* Stat chips */
+.pos-stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: color 0.3s;
+}
+
+.pos-stat-pnl      { background: #f0fff4; border-color: #9ae6b4; color: #22543d; }
+.pos-stat-realized { background: #ebf8ff; border-color: #90cdf4; color: #2a4365; }
+.pos-stat-margin   { background: #fffff0; border-color: #f6e05e; color: #744210; }
+.pos-stat-chip strong { font-size: 12px; }
+
+/* ===================================
+   Tab Navigation
+   =================================== */
+.pos-tab-nav {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    background: #f7fafc;
+    border-bottom: 2px solid #e2e8f0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.pos-tab-btn {
+    position: relative;
+    padding: 12px 20px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #718096;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-bottom: -2px;
+}
+
+.pos-tab-btn:hover  { color: #667eea; background: #eef0fd; border-radius: 6px 6px 0 0; }
+.pos-tab-btn.active { color: #667eea; border-bottom-color: #667eea; background: white; }
+
+.pos-tab-badge {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    min-width: 18px;
+    text-align: center;
+}
+.pos-tab-btn:not(.active) .pos-tab-badge { background: #cbd5e0; color: #4a5568; }
+
+.pos-tab-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+}
+
+/* ===================================
+   Action Buttons
+   =================================== */
+.pos-action-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.pos-action-btn:hover  { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+.pos-action-btn:active { transform: translateY(0); }
+
+.pos-btn-refresh   { background: #ebf8ff; color: #2b6cb0; border: 1px solid #90cdf4; }
+.pos-btn-refresh:hover { background: #bee3f8; }
+
+.pos-btn-squareoff { background: linear-gradient(135deg,#f56565,#e53e3e); color: white; }
+.pos-btn-squareoff:hover { background: linear-gradient(135deg,#e53e3e,#c53030); }
+
+.pos-btn-export    { background: #f0fff4; color: #276749; border: 1px solid #9ae6b4; }
+.pos-btn-export:hover { background: #c6f6d5; }
+
+/* ===================================
+   Tab Panels
+   =================================== */
+.pos-tab-panel        { display: none; }
+.pos-tab-panel.active { display: block; }
+
+/* ===================================
+   Toolbar / Filters
+   =================================== */
+.pos-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pos-toolbar-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pos-toolbar-right { display: flex; align-items: center; gap: 10px; }
+
+.pos-filter-label { font-size: 11px; font-weight: 600; color: #4a5568; }
+
+.pos-filter-select {
+    padding: 4px 8px;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: #2d3748;
+    transition: border-color 0.2s;
+}
+
+.pos-filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+}
+
+/* Chip-style filter buttons (Order Report status) */
+.pos-chip-btn {
+    padding: 4px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: #4a5568;
+    transition: all 0.2s;
+}
+.pos-chip-btn:hover  { border-color: #667eea; color: #667eea; }
+.pos-chip-btn.active { background: #667eea; color: white; border-color: #667eea; }
+
+.pos-count-label { font-size: 11px; color: #718096; }
+
+/* ===================================
+   Table
+   =================================== */
+.pos-table-wrap {
+    overflow-x: auto;
+    max-height: 58vh;
+    overflow-y: auto;
+}
+
+.pos-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 12px;
+}
+
+.pos-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.pos-table th {
+    padding: 10px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.pos-table th.num,
+.pos-table td.num { text-align: right; }
+
+.pos-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.pos-table tr:last-child td { border-bottom: none; }
+
+.pos-table tbody tr {
+    transition: all 0.18s ease;
+    border-left: 4px solid transparent;
+}
+
+.pos-table tbody tr:hover {
+    background: #f7fafc !important;
+    border-left-color: #667eea;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.pos-table tbody tr:hover td { font-weight: 600; }
+
+/* ── Column helper classes ── */
+.pos-sym    { font-weight: 700; color: #2d3748; font-size: 12px; }
+.pos-strike { font-size: 13px; font-weight: 700; color: #2d3748; }
+.pos-ltp    { font-size: 13px; font-weight: 700; color: #2d3748; }
+
+/* ── P&L coloring (applied by pnlClass()) ── */
+.pnl-pos  { color: #22543d; font-weight: 700; }
+.pnl-neg  { color: #c53030; font-weight: 700; }
+.pnl-zero { color: #718096; font-weight: 600; }
+
+/* ── Direction badges (from _get_direction()) ── */
+.dir-long {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #f0fff4;
+    color: #22543d;
+    border: 1px solid #9ae6b4;
+}
+
+.dir-short {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fc8181;
+}
+
+.dir-closed {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #f7fafc;
+    color: #718096;
+    border: 1px solid #cbd5e0;
+}
+
+/* ── Net Qty coloring ── */
+.qty-long  { color: #22543d; font-weight: 700; }
+.qty-short { color: #c53030; font-weight: 700; }
+.qty-flat  { color: #718096; font-weight: 600; }
+
+/* ── Option type ── */
+.opt-ce  { color: #2b6cb0; font-weight: 700; }
+.opt-pe  { color: #c53030; font-weight: 700; }
+.opt-fut { color: #744210; font-weight: 700; }
+
+/* ── Side labels ── */
+.side-buy  { color: #22543d; font-weight: 700; background: #f0fff4; padding: 2px 7px; border-radius: 4px; font-size: 11px; }
+.side-sell { color: #c53030; font-weight: 700; background: #fff5f5; padding: 2px 7px; border-radius: 4px; font-size: 11px; }
+
+/* ── Order status badges (normalised ordSt) ── */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.status-complete  { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; }
+.status-rejected  { background: #fff5f5; color: #c53030; border: 1px solid #fc8181; }
+.status-open      { background: #ebf8ff; color: #2a4365; border: 1px solid #90cdf4; }
+.status-cancelled { background: #f7fafc; color: #4a5568; border: 1px solid #cbd5e0; }
+.status-unknown   { background: #fffff0; color: #744210; border: 1px solid #f6e05e; }
+
+/* ── Rejection reason cell ── */
+.reason-cell {
+    font-size: 10px;
+    color: #718096;
+    max-width: 160px;
+    overflow: visible;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+}
+
+/* ── Sq Off button ── */
+.tbl-sqoff-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #f56565;
+    color: white;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.tbl-sqoff-btn:hover    { background: #c53030; transform: scale(1.05); }
+.tbl-sqoff-btn:disabled { background: #cbd5e0; cursor: not-allowed; transform: none; }
+
+/* ===================================
+   Summary Footer Bar
+   =================================== */
+.pos-summary-bar {
+    display: flex;
+    align-items: stretch;
+    background: #f7fafc;
+    border-top: 2px solid #e2e8f0;
+}
+
+.pos-summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-right: 1px solid #e2e8f0;
+    flex: 1;
+    min-width: 110px;
+    text-align: center;
+}
+
+.pos-summary-item:last-child { border-right: none; }
+
+.pos-summary-label {
+    font-size: 10px;
+    color: #718096;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+}
+
+.pos-summary-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.pos-total-pnl { font-size: 16px !important; }
+
+.pos-complete  { color: #22543d; }
+.pos-rejected  { color: #c53030; }
+.pos-open      { color: #2b6cb0; }
+
+/* ===================================
+   Loading / Empty States
+   =================================== */
+.pos-loading {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    font-size: 13px;
+}
+
+.pos-spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pos-empty { text-align: center; padding: 50px 20px; color: #a0aec0; }
+.pos-empty-icon { font-size: 44px; margin-bottom: 10px; }
+.pos-empty-msg  { font-size: 14px; font-weight: 600; }
+
+/* ===================================
+   User Pill  (same as dashboard)
+   =================================== */
+.user-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.pill-old { background: #2b6cb0; color: white; border: 1px solid #3182ce; }
+.pill-new { background: #276749; color: white; border: 1px solid #38a169; }
+
+/* ===================================
+   Modals — Square Off overlays
+   =================================== */
+.pos-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.75);
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    animation: fadeIn 0.2s;
+}
+
+.pos-modal-overlay.active { display: flex; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.pos-modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.25s;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.pos-modal-box h2 { color: #2d3748; font-size: 20px; margin-bottom: 16px; text-align: center; }
+.pos-modal-box p  { font-size: 14px; color: #4a5568; line-height: 1.6; margin-bottom: 8px; text-align: center; }
+.pos-modal-warn   { font-size: 12px !important; color: #c53030 !important; font-weight: 600; }
+
+.pos-modal-detail {
+    background: #f7fafc;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    line-height: 1.8;
+}
+
+.pos-modal-btns { display: flex; gap: 12px; margin-top: 20px; }
+
+.pos-modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.pos-modal-cancel  { background: #e2e8f0; color: #2d3748; }
+.pos-modal-cancel:hover  { background: #cbd5e0; }
+.pos-modal-confirm { background: #f56565; color: white; }
+.pos-modal-confirm:hover { background: #c53030; transform: scale(1.02); }
+
+/* ===================================
+   Result Modal — mirrors dashboard .modal
+   =================================== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 4000;
+    animation: fadeIn 0.2s;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    animation: slideUp 0.2s;
+}
+
+.modal-content h2 { margin-bottom: 15px; color: #2d3748; font-size: 18px; }
+.modal-content p  {
+    font-size: 13px; color: #4a5568;
+    margin-bottom: 20px; line-height: 1.5; white-space: pre-line;
+}
+
+.modal-close {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 22px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: transform 0.2s;
+}
+
+.modal-close:hover { transform: scale(1.05); }
+
+/* ===================================
+   LTP Flash Animations
+   =================================== */
+@keyframes flashGreen { 0% { background: #c6f6d5; } 100% { background: transparent; } }
+@keyframes flashRed   { 0% { background: #fed7d7; } 100% { background: transparent; } }
+
+.ltp-up   { animation: flashGreen 0.6s ease-out; }
+.ltp-down { animation: flashRed   0.6s ease-out; }
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+    .pos-summary-bar { flex-wrap: wrap; }
+    .pos-summary-item { min-width: 45%; }
+    .pos-tab-actions { width: 100%; justify-content: flex-end; }
+    .pos-table-wrap { max-height: 50vh; }
+}
+
+/* ===================================
+   Dark Mode
+   =================================== */
+@media (prefers-color-scheme: dark) {
+    body { background: linear-gradient(135deg, #3a4a8a 0%, #4a2d6e 100%); }
+
+    .pos-container { background: #1a202c; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+
+    .pos-status-bar { background: #2d3748; border-bottom-color: #4a5568; color: #a0aec0; }
+
+    .pos-stat-pnl      { background: #1a3d2b; border-color: #68d391; color: #68d391; }
+    .pos-stat-realized { background: #1a2d3d; border-color: #63b3ed; color: #63b3ed; }
+    .pos-stat-margin   { background: #3d3000; border-color: #f6e05e; color: #f6e05e; }
+
+    .pos-tab-nav   { background: #1a202c; border-bottom-color: #4a5568; }
+    .pos-tab-btn   { color: #a0aec0; }
+    .pos-tab-btn:hover  { background: #2d3748; color: #a0aec0; }
+    .pos-tab-btn.active { background: #1a202c; color: #90cdf4; border-bottom-color: #90cdf4; }
+    .pos-tab-btn:not(.active) .pos-tab-badge { background: #4a5568; color: #a0aec0; }
+
+    .pos-toolbar      { background: #2d3748; border-bottom-color: #4a5568; }
+    .pos-filter-label { color: #a0aec0; }
+    .pos-filter-select { background: #4a5568; color: #e2e8f0; border-color: #718096; }
+    .pos-chip-btn  { background: #4a5568; color: #a0aec0; border-color: #718096; }
+    .pos-chip-btn.active { background: #667eea; color: white; border-color: #667eea; }
+    .pos-count-label { color: #a0aec0; }
+
+    .pos-table { background: #1a202c; }
+    .pos-table td { border-bottom-color: #2d3748; color: #e2e8f0; }
+    .pos-table tbody tr:hover { background: #2d3748 !important; }
+
+    .pos-sym    { color: #e2e8f0; }
+    .pos-strike { color: #e2e8f0; }
+    .pos-ltp    { color: #e2e8f0; }
+
+    .dir-long   { background: #1a3d2b; border-color: #276749; color: #68d391; }
+    .dir-short  { background: #3d1515; border-color: #c53030; color: #fc8181; }
+    .dir-closed { background: #2d3748; border-color: #4a5568; color: #a0aec0; }
+
+    .pnl-pos  { color: #68d391; }
+    .pnl-neg  { color: #fc8181; }
+    .pnl-zero { color: #a0aec0; }
+
+    .qty-long  { color: #68d391; }
+    .qty-short { color: #fc8181; }
+    .qty-flat  { color: #a0aec0; }
+
+    .side-buy  { background: #1a3d2b; color: #68d391; }
+    .side-sell { background: #3d1515; color: #fc8181; }
+
+    .status-complete  { background: #1a3d2b; color: #68d391; border-color: #276749; }
+    .status-rejected  { background: #3d1515; color: #fc8181; border-color: #c53030; }
+    .status-open      { background: #1a2d3d; color: #90cdf4; border-color: #2b6cb0; }
+    .status-cancelled { background: #2d3748; color: #a0aec0; border-color: #4a5568; }
+
+    .reason-cell { color: #a0aec0; }
+
+    .pos-summary-bar   { background: #2d3748; border-top-color: #4a5568; }
+    .pos-summary-item  { border-right-color: #4a5568; }
+    .pos-summary-label { color: #a0aec0; }
+    .pos-summary-val   { color: #e2e8f0; }
+
+    .pos-modal-box    { background: #2d3748; }
+    .pos-modal-box h2 { color: #e2e8f0; }
+    .pos-modal-box p  { color: #a0aec0; }
+    .pos-modal-detail { background: #1a202c; color: #e2e8f0; }
+    .pos-modal-cancel { background: #4a5568; color: #e2e8f0; }
+    .pos-modal-cancel:hover { background: #718096; }
+
+    .modal-content    { background: #2d3748; }
+    .modal-content h2 { color: #e2e8f0; }
+    .modal-content p  { color: #a0aec0; }
+
+    .pos-loading { color: #a0aec0; }
+    .pos-spinner { border-color: #4a5568; border-top-color: #667eea; }
+
+    .tbl-sqoff-btn { background: #c53030; }
+    .tbl-sqoff-btn:hover { background: #9b2c2c; }
+    .tbl-sqoff-btn:disabled { background: #4a5568; }
+
+    .pill-old { background: #1e4e8c; border-color: #2b6cb0; }
+    .pill-new { background: #1a4731; border-color: #276749; }
+
+    .pos-btn-refresh { background: #1a2d3d; color: #90cdf4; border-color: #2b6cb0; }
+    .pos-btn-export  { background: #1a3d2b; color: #68d391; border-color: #276749; }
+
+    .opt-ce  { color: #90cdf4; }
+    .opt-pe  { color: #fc8181; }
+    .opt-fut { color: #f6e05e; }
+
+    .pos-complete { color: #68d391; }
+    .pos-rejected { color: #fc8181; }
+    .pos-open     { color: #90cdf4; }
+}
+
+/* ===================================
+   Checkbox column
+   =================================== */
+.pos-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.pos-checkbox:disabled { cursor: not-allowed; opacity: 0.35; }
+
+/* ===================================
+   Floating Bulk Sq-Off Button
+   Mirrors dashboard .bulk-order-btn
+   =================================== */
+.pos-bulk-sqoff-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 15px 28px;
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(245,101,101,0.45);
+    transition: all 0.3s;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pos-bulk-sqoff-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(245,101,101,0.65);
+}
+
+.pos-bulk-badge {
+    background: white;
+    color: #e53e3e;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    min-width: 20px;
+    text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+    .pos-checkbox { accent-color: #90cdf4; }
+}
+
+/* ===================================
+   [FIX-1] CLOSED row — visual only, checkbox still clickable
+   =================================== */
+.pos-row-closed {
+    opacity: 0.55;
+}
+.pos-row-closed .tbl-sqoff-btn {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ===================================
+   Checkbox column
+   =================================== */
+.pos-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #667eea;
+    /* [FIX-1] Always clickable — no disabled attribute set */
+}
+
+/* ===================================
+   Floating Bulk Sq-Off Button
+   =================================== */
+.pos-bulk-sqoff-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 15px 28px;
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(245,101,101,0.45);
+    transition: all 0.3s;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pos-bulk-sqoff-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(245,101,101,0.65);
+}
+.pos-bulk-badge {
+    background: white;
+    color: #e53e3e;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    min-width: 20px;
+    text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+    .pos-checkbox { accent-color: #90cdf4; }
+    .pos-row-closed { opacity: 0.4; }
+}
+
+/* ===================================
+   Trade History — Day KPI Cards
+   =================================== */
+.hist-kpi-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    background: #f7fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 0;
+}
+
+.hist-kpi-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-right: 1px solid #e2e8f0;
+    min-width: 100px;
+    flex: 1;
+    text-align: center;
+}
+
+.hist-kpi-card:last-child { border-right: none; }
+
+.hist-kpi-label {
+    font-size: 9px;
+    color: #718096;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+}
+
+.hist-kpi-val {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2d3748;
+    line-height: 1.2;
+}
+
+.hist-kpi-sub {
+    font-size: 10px;
+    color: #718096;
+    margin-top: 2px;
+}
+
+.hist-kpi-sym {
+    font-size: 10px;
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 2px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hist-kpi-highlight { background: #f0fff4; }
+.hist-kpi-best      { background: #f0fff4; }
+.hist-kpi-worst     { background: #fff5f5; }
+
+/* ===================================
+   Trade History — Sub-tab chips
+   =================================== */
+.hist-sub-btn {
+    padding: 5px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: #4a5568;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.hist-sub-btn:hover { border-color: #667eea; color: #667eea; background: #eef0fd; }
+.hist-sub-btn.active { background: #667eea; color: white; border-color: #667eea; }
+
+/* ===================================
+   Order Report — OPEN row highlight
+   =================================== */
+.order-row-open {
+    background: #fffbeb !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+.order-row-open:hover {
+    background: #fef3c7 !important;
+}
+
+/* Cancel button inside order table */
+.tbl-cancel-btn {
+    padding: 4px 10px;
+    border: 1px solid #f56565;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    background: white;
+    color: #c53030;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tbl-cancel-btn:hover {
+    background: #f56565;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* ===================================
+   Dark Mode additions
+   =================================== */
+@media (prefers-color-scheme: dark) {
+    .hist-kpi-bar    { background: #2d3748; border-bottom-color: #4a5568; }
+    .hist-kpi-card   { border-right-color: #4a5568; }
+    .hist-kpi-label  { color: #a0aec0; }
+    .hist-kpi-val    { color: #e2e8f0; }
+    .hist-kpi-sub    { color: #718096; }
+    .hist-kpi-sym    { color: #a0aec0; }
+    .hist-kpi-highlight { background: #1a3d2b; }
+    .hist-kpi-best      { background: #1a3d2b; }
+    .hist-kpi-worst     { background: #3d1515; }
+
+    .hist-sub-btn        { background: #4a5568; color: #a0aec0; border-color: #718096; }
+    .hist-sub-btn:hover  { background: #2d3748; color: #90cdf4; border-color: #667eea; }
+    .hist-sub-btn.active { background: #667eea; color: white; border-color: #667eea; }
+
+    .order-row-open  { background: #3d2f00 !important; border-left-color: #d97706 !important; }
+    .order-row-open:hover { background: #4a3800 !important; }
+    .tbl-cancel-btn  { background: #2d3748; color: #fc8181; border-color: #c53030; }
+    .tbl-cancel-btn:hover { background: #c53030; color: white; }
+}
+
+
+
+/* ===================================
+   Action cell — SQ OFF + ADD side by side
+   =================================== */
+.pos-action-cell {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* ── ADD button (blue, distinct from red SQ OFF) ── */
+.tbl-add-btn {
+    padding: 4px 9px;
+    border: none;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.tbl-add-btn:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6b3fa0 100%);
+    transform: scale(1.05);
+}
+
+.tbl-add-btn:disabled {
+    background: #cbd5e0;
+    color: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===================================
+   Sq-Off & Add-Position modal controls
+   (shared between singleSqOffModal and addPositionModal)
+   =================================== */
+.sqoff-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0 4px;
+}
+
+.sqoff-ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 32px;
+}
+
+.sqoff-ctrl-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5568;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.sqoff-ctrl-input {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+    background: white;
+    width: 120px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sqoff-ctrl-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.sqoff-ctrl-input:disabled {
+    background: #edf2f7;
+    color: #a0aec0;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+.sqoff-ctrl-select {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 100px;
+}
+
+.sqoff-ctrl-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.sqoff-qty-label {
+    font-size: 11px;
+    color: #718096;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Side select coloring */
+.sqoff-side-select option[value="BUY"]  { color: #22543d; }
+.sqoff-side-select option[value="SELL"] { color: #c53030; }
+
+/* ── Add confirm button (blue gradient, not red) ── */
+.sqoff-add-confirm {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+.sqoff-add-confirm:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6b3fa0 100%) !important;
+    transform: scale(1.02);
+}
+
+/* ===================================
+   Global quick-set bar (bulk sq-off modal)
+   =================================== */
+.sqoff-global-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #edf2f7;
+    border-radius: 6px;
+    flex-wrap: wrap;
+}
+
+.sqoff-global-btn {
+    padding: 4px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: white;
+    color: #4a5568;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.sqoff-global-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #eef0fd;
+}
+
+.sqoff-global-full {
+    background: #f0fff4;
+    color: #276749;
+    border-color: #9ae6b4;
+}
+
+.sqoff-global-full:hover {
+    background: #c6f6d5;
+    border-color: #68d391;
+}
+
+/* ===================================
+   Bulk Sq-Off table (inside modal)
+   =================================== */
+.bsq-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.bsq-table thead tr {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.bsq-table th {
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.bsq-table th.num { text-align: right; }
+
+.bsq-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.bsq-table tbody tr:hover { background: #f7fafc; }
+.bsq-table tbody tr:last-child td { border-bottom: none; }
+
+.bsq-sym-cell { white-space: nowrap; }
+.bsq-opt-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #4a5568;
+    vertical-align: middle;
+}
+
+/* ===================================
+   Dark mode
+   =================================== */
+@media (prefers-color-scheme: dark) {
+
+    /* Action cell buttons */
+    .tbl-add-btn { background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); }
+    .tbl-add-btn:hover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .tbl-add-btn:disabled { background: #2d3748; color: #4a5568; }
+
+    /* Controls */
+    .sqoff-controls { background: #1a202c; border-color: #4a5568; }
+    .sqoff-ctrl-label { color: #a0aec0; }
+    .sqoff-ctrl-input { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
+    .sqoff-ctrl-input:disabled { background: #1a202c; color: #4a5568; }
+    .sqoff-ctrl-select { background: #2d3748; border-color: #4a5568; color: #e2e8f0; }
+    .sqoff-qty-label { color: #718096; }
+
+    /* Global bar */
+    .sqoff-global-bar { background: #2d3748; }
+    .sqoff-global-btn { background: #4a5568; color: #a0aec0; border-color: #718096; }
+    .sqoff-global-btn:hover { background: #2d3748; color: #90cdf4; border-color: #667eea; }
+    .sqoff-global-full { background: #1a3d2b; color: #68d391; border-color: #276749; }
+    .sqoff-global-full:hover { background: #22543d; border-color: #68d391; }
+
+    /* Bulk modal table */
+    .bsq-table td { border-bottom-color: #2d3748; color: #e2e8f0; }
+    .bsq-table tbody tr:hover { background: #2d3748; }
+    .bsq-opt-badge { background: #4a5568; color: #a0aec0; }
+}

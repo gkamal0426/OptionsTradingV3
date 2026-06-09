@@ -1,0 +1,545 @@
+/* ═══════════════════════════════════════════════
+   analytics.css  —  Light theme matching positions page
+   ═══════════════════════════════════════════════ */
+
+.ana-container {
+    padding: 16px 20px;
+    max-width: 100%;
+}
+
+/* ══════════════════════════════════════════════
+   PAGE TAB NAV
+   ══════════════════════════════════════════════ */
+.ana-tab-nav {
+    display: flex;
+    gap: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px 10px 0 0;
+    padding: 6px 8px 0;
+    border-bottom: none;
+}
+
+.ana-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px 8px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    white-space: nowrap;
+}
+.ana-tab-btn:hover  { color: #334155; background: #f1f5f9; }
+.ana-tab-btn.active { color: #667eea; border-bottom-color: #667eea; background: #fff; }
+
+/* ══════════════════════════════════════════════
+   PAGE TAB PANELS
+   ══════════════════════════════════════════════ */
+.ana-tab-panel {
+    display: none;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 16px;
+}
+.ana-tab-panel.active { display: block; }
+
+.ana-placeholder {
+    text-align: center;
+    padding: 80px 20px;
+    color: #94a3b8;
+    font-size: 15px;
+}
+
+/* ══════════════════════════════════════════════
+   STATUS / CONTROL BAR
+   ══════════════════════════════════════════════ */
+.ana-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 9px 16px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #64748b;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ana-status-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ana-status-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.refresh-indicator {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+#pcrStatusDot {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+.ana-ctrl-label {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.ana-select,
+.ana-date-input,
+.ana-number-input {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.ana-select:focus,
+.ana-date-input:focus,
+.ana-number-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+}
+.ana-number-input { width: 64px; text-align: center; cursor: text; }
+
+.ana-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+.ana-btn:hover  { opacity: 0.85; }
+.ana-btn:active { transform: scale(0.97); }
+.ana-btn-load  { background: #e2e8f0; color: #334155; }
+.ana-btn-start { background: #22c55e; color: #fff; }
+.ana-btn-stop  { background: #ef4444; color: #fff; }
+
+/* ══════════════════════════════════════════════
+   PCR LIVE SUMMARY STRIP
+   ══════════════════════════════════════════════ */
+.pcr-live-summary {
+    display: flex;
+    align-items: stretch;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════════════
+   OI CHANGE LIVE SUMMARY STRIP
+   ══════════════════════════════════════════════ */
+.oic-live-summary {
+    display: flex;
+    align-items: stretch;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* Shared summary block styles (used by both strips) */
+.pcr-sum-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    flex: 1;
+    min-width: 100px;
+    gap: 4px;
+    transition: background 0.15s;
+}
+.pcr-sum-block:hover { background: #f1f5f9; }
+
+.pcr-sum-hl {
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+    border-left:  2px solid #667eea;
+    border-right: 2px solid #667eea;
+}
+
+/* OIC highlight block — indigo/purple tint */
+.oic-sum-hl {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f8fafc 100%);
+    border-left:  2px solid #22c55e;
+    border-right: 2px solid #22c55e;
+}
+
+.pcr-sum-sep {
+    width: 1px;
+    background: #e2e8f0;
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+.pcr-sum-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+}
+
+.pcr-sum-val {
+    font-size: 15px;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: 0.01em;
+}
+
+.pcr-sum-index { color: #d97706; }
+.pcr-sum-call  { color: #2563eb; }
+.pcr-sum-put   { color: #dc2626; }
+.pcr-sum-time  { font-size: 12px !important; font-weight: 600 !important; color: #94a3b8 !important; }
+.pcr-sum-hl .pcr-sum-val { color: #667eea; font-size: 17px; }
+
+/* Builder sub-label in OIC summary */
+.oic-builder-strike { font-size: 16px; font-weight: 800; color: #1e293b; }
+.oic-builder-chg    { font-size: 11px; font-weight: 700; margin-top: 1px; }
+
+/* Direction colour classes */
+.bull { color: #16a34a !important; }
+.bear { color: #dc2626 !important; }
+.neut { color: #2563eb !important; }
+.unk  { color: #94a3b8 !important; }
+
+/* ══════════════════════════════════════════════
+   MAIN TABLE
+   ══════════════════════════════════════════════ */
+.ana-table-wrap {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.ana-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ana-table thead th {
+    background: #f8fafc;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 9px 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+.ana-table thead th.num { text-align: right; }
+
+.ana-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.12s;
+}
+.ana-table tbody tr:hover { background: #f8fafc; }
+
+.ana-table tbody td {
+    padding: 9px 14px;
+    color: #334155;
+    vertical-align: middle;
+}
+.ana-table tbody td.num { text-align: right; }
+
+.ana-empty-row td {
+    text-align: center;
+    padding: 50px !important;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Direction badge */
+.pcr-dir-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.pcr-dir-badge.bull { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+.pcr-dir-badge.bear { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+.pcr-dir-badge.neut { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.pcr-dir-badge.unk  { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
+
+/* View strikes button */
+.pcr-view-btn {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #2563eb;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+.pcr-view-btn:hover { background: #dbeafe; }
+
+/* OIC view button — green tint */
+.oic-view-btn {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #16a34a;
+}
+.oic-view-btn:hover { background: #dcfce7; }
+
+/* CE / PE type colours */
+.tag-ce { color: #2563eb; font-weight: 700; }
+.tag-pe { color: #dc2626; font-weight: 700; }
+
+/* ══════════════════════════════════════════════
+   MODAL — OVERLAY & BOX
+   ══════════════════════════════════════════════ */
+.ana-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.ana-modal-box {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 82vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(15,23,42,0.18);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+/* Wider variant for OIC chart (more strikes) */
+.oic-modal-wide { max-width: 860px; }
+
+/* ── Sticky header ────────────────────────────── */
+.ana-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 14px 14px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 14px;
+    gap: 12px;
+}
+
+.ana-modal-title-text {
+    color: #1e293b;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.ana-modal-header-close {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+}
+.ana-modal-header-close:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+/* ── Modal tab nav (sticky just below header) ── */
+.ana-modal-tab-nav {
+    position: sticky;
+    top: 57px;
+    z-index: 9;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    gap: 2px;
+    padding: 6px 16px 0;
+}
+
+.ana-modal-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px 6px;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+.ana-modal-tab:hover  { color: #334155; background: #f1f5f9; }
+.ana-modal-tab.active { color: #667eea; border-bottom-color: #667eea; background: #fff; }
+
+/* ── Modal tab panels ───────────────────────── */
+.ana-modal-tab-panel { display: none; padding: 16px 20px; }
+.ana-modal-tab-panel.active { display: block; }
+
+.ana-modal-table-wrap {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+/* ── Footer close button ───────────────────── */
+.ana-modal-btns {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 20px 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ana-modal-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ana-modal-cancel       { background: #f1f5f9; color: #334155; }
+.ana-modal-cancel:hover { background: #e2e8f0; }
+
+/* ══════════════════════════════════════════════
+   PCR — OI BAR CHART (SVG, in strike modal)
+   ══════════════════════════════════════════════ */
+.strike-chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 12px;
+}
+
+.strike-legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+.strike-legend-dot.ce { background: #3b82f6; }
+.strike-legend-dot.pe { background: #ef4444; }
+
+.strike-chart-scroll-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fafafa;
+    padding: 12px 8px 4px;
+}
+
+.strike-oi-chart { min-height: 340px; display: block; }
+.strike-oi-chart svg { display: block; }
+.strike-oi-chart rect { cursor: default; transition: opacity 0.12s; }
+.strike-oi-chart rect:hover { opacity: 0.75; }
+
+/* ══════════════════════════════════════════════
+   OIC — CHANGE CHART (Chart.js, in OIC modal)
+   ══════════════════════════════════════════════ */
+.oic-chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.oic-legend-note {
+    font-size: 11px;
+    font-weight: 400;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+.oic-chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fafafa;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .pcr-live-summary,
+    .oic-live-summary { flex-wrap: wrap; }
+    .pcr-sum-block    { min-width: 80px; padding: 10px 12px; }
+    .pcr-sum-sep      { display: none; }
+    .ana-status-bar   { flex-direction: column; align-items: flex-start; }
+    .ana-status-right { flex-wrap: wrap; }
+    .ana-modal-box    { max-height: 90vh; }
+    .oic-legend-note  { margin-left: 0; }
+}

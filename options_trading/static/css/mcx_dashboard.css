@@ -1,0 +1,316 @@
+/* =====================================================
+   mcx_dashboard.css  v1.2
+   Delta styles on top of dashboard.css
+   ===================================================== */
+
+/* ── MCX Exchange Badge ───────────────────────────── */
+.mcx-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+    color: #1a1a1a;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(237, 137, 54, 0.4);
+    flex-shrink: 0;
+}
+
+/* ── Override table header gradient to MCX amber ──── */
+thead {
+    background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%) !important;
+}
+
+/* ── Top bar text ─────────────────────────────────── */
+.bar-text {
+    font-size: 11px;
+    color: #4a5568;
+    white-space: nowrap;
+}
+
+/* ── Vertical divider ─────────────────────────────── */
+.bar-divider {
+    color: #cbd5e0;
+    font-size: 13px;
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+/* ── Label + control inline group ────────────────── */
+.bar-control-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a5568;
+    white-space: nowrap;
+}
+
+/* ── Global Product Select ────────────────────────── */
+.global-product-select {
+    padding: 4px 8px;
+    border: 2px solid #ed8936;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff8f0;
+    color: #c05621;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.global-product-select:hover,
+.global-product-select:focus {
+    border-color: #c05621;
+    box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.15);
+}
+
+/* ── Index Dropdown ───────────────────────────────── */
+.index-select {
+    padding: 4px 8px;
+    border: 2px solid #9f7aea;          /* purple accent — distinguishes from strike */
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #faf5ff;
+    color: #553c9a;
+    outline: none;
+    min-width: 100px;
+    transition: all 0.2s;
+}
+
+.index-select:hover,
+.index-select:focus {
+    border-color: #6b46c1;
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.12);
+}
+
+/* ── Strike Dropdown ──────────────────────────────── */
+.strike-select {
+    padding: 4px 8px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: white;
+    color: #2d3748;
+    outline: none;
+    min-width: 90px;
+    max-width: 120px;
+    transition: all 0.2s;
+}
+
+.strike-select:not(:disabled):hover,
+.strike-select:focus {
+    border-color: #ed8936;
+    box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.12);
+}
+
+.strike-select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: #f7fafc;
+}
+
+/* ── Option Type Select (CE / PE) ─────────────────── */
+.option-type-select {
+    padding: 4px 8px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: white;
+    color: #2d3748;
+    outline: none;
+    width: 58px;
+    transition: all 0.2s;
+}
+
+.option-type-select:hover,
+.option-type-select:focus {
+    border-color: #ed8936;
+    box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.12);
+}
+
+/* ── Shared bar button base ───────────────────────── */
+.bar-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.bar-action-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* FETCH — purple, matches index dropdown */
+.bar-btn-fetch {
+    background: linear-gradient(135deg, #b794f4, #9f7aea);
+    color: #1a1a1a;
+    box-shadow: 0 2px 6px rgba(159, 122, 234, 0.35);
+}
+
+.bar-btn-fetch:not(:disabled):hover {
+    background: linear-gradient(135deg, #9f7aea, #6b46c1);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(107, 70, 193, 0.4);
+}
+
+/* ADD — amber/gold */
+.bar-btn-add {
+    background: linear-gradient(135deg, #f6ad55, #ed8936);
+    color: #1a1a1a;
+    box-shadow: 0 2px 6px rgba(237, 137, 54, 0.3);
+}
+
+.bar-btn-add:not(:disabled):hover {
+    background: linear-gradient(135deg, #ed8936, #c05621);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(237, 137, 54, 0.45);
+}
+
+/* DELETE — soft red, appears only when rows are checked */
+.bar-btn-delete {
+    background: #fff5f5;
+    color: #c53030;
+    border: 1.5px solid #feb2b2;
+}
+
+.bar-btn-delete:hover {
+    background: #fee2e2;
+    border-color: #fc8181;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(197, 48, 48, 0.15);
+}
+
+/* ── Inline strike action status ──────────────────── */
+.strike-action-status {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 0;
+    transition: color 0.3s;
+}
+
+.strike-action-status.success { color: #276749; }
+.strike-action-status.error   { color: #c53030; }
+.strike-action-status.loading { color: #718096; }
+
+/* ── Spinner ──────────────────────────────────────── */
+.btn-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-top-color: #1a1a1a;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ── Per-row Product Select ───────────────────────── */
+.product-select {
+    width: 68px;
+    padding: 4px 5px;
+    border: 1px solid #f6ad55;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fffaf0;
+    color: #c05621;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.product-select:focus {
+    border-color: #ed8936;
+    box-shadow: 0 0 0 2px rgba(237, 137, 54, 0.15);
+}
+
+.product-select[data-product="MIS"]  { color: #0694a2; border-color: #81e6d9; }
+.product-select[data-product="NRML"] { color: #3182ce; border-color: #90cdf4; }
+.product-select[data-product="CNC"]  { color: #276749; border-color: #9ae6b4; }
+.product-select[data-product="CO"]   { color: #c53030; border-color: #feb2b2; }
+
+/* ── Product Badge in Confirm Modal ──────────────── */
+.mcx-product-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f6ad55, #ed8936);
+    color: #1a1a1a;
+}
+
+/* ── Row hover → amber ────────────────────────────── */
+tbody tr:hover {
+    border-left: 4px solid #ed8936 !important;
+}
+
+tbody tr:hover .strike { color: #ed8936 !important; }
+tbody tr:hover .symbol { color: #ed8936 !important; }
+
+/* ── Floating bulk btn ────────────────────────────── */
+.bulk-order-btn {
+    background: linear-gradient(135deg, #f6ad55 0%, #dd6b20 100%) !important;
+    box-shadow: 0 8px 20px rgba(221, 107, 32, 0.45) !important;
+}
+
+.bulk-order-btn:hover {
+    box-shadow: 0 12px 30px rgba(221, 107, 32, 0.65) !important;
+}
+
+/* ── Confirm YES btn ──────────────────────────────── */
+.confirm-btn-yes {
+    background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%) !important;
+    color: #1a1a1a !important;
+}
+
+.confirm-btn-yes:hover {
+    background: linear-gradient(135deg, #ed8936 0%, #c05621 100%) !important;
+}
+
+/* ── Left bar wrapping on narrow screens ──────────── */
+.auto-refresh-left {
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    row-gap: 6px;
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 1200px) {
+    .bar-text { display: none; }
+}
+
+@media (max-width: 900px) {
+    .product-select, .global-product-select,
+    .strike-select, .index-select { font-size: 10px; }
+    .strike-select { min-width: 70px; }
+    .index-select  { min-width: 80px; }
+}

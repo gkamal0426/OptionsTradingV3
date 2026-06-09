@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Options Trading v3.1{% endblock %}</title>
+    
+    <!-- Common CSS for all pages -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/common.css') }}">
+    
+    <!-- Page-specific CSS -->
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="main-nav">
+        <div class="nav-left">
+            <span class="nav-logo">📊 Options Trading v3.1</span>
+        </div>
+        
+        <div class="nav-center">
+            <a href="/dashboard" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                📈 Dashboard
+            </a>
+            <a href="/positions" class="nav-link {% if active_page == 'positions' %}active{% endif %}">
+                📋 Positions
+            </a>
+            <a href="/strategies" class="nav-link {% if active_page == 'orders' %}active{% endif %}">
+                🎯 Strategies
+            </a>
+            <a href="/analytics" class="nav-link {% if active_page == 'analytics' %}active{% endif %}">
+                📊 Analytics
+            </a>
+            </a>
+            <a href="/mcx" class="nav-link {% if active_page == 'mcx' %}active{% endif %}">
+                📊 MCX
+            </a>
+
+        </div>
+        
+        <div class="nav-right">
+            <select id="globalUserSelect" class="nav-user-select" onchange="handleGlobalUserChange()">
+                <option value="client1">👤 Client 1</option>
+                <option value="client2">👤 Client 2</option>
+            </select>
+
+            <button class="nav-btn nav-logout" onclick="handleGlobalLogout()">
+                🚪 Logout
+            </button>
+
+            <!-- Actions Dropdown — available on every page -->
+            <div class="actions-dropdown">
+                <button class="actions-menu-btn" onclick="toggleActionsMenu()">
+                    ⚙️ Actions ▼
+                </button>
+                <div class="actions-dropdown-content" id="actionsDropdown">
+                    <a href="#" onclick="handleOrders(); return false;">
+                        <span class="dropdown-icon">🧾</span> View Orders History
+                    </a>
+                    <a href="#" onclick="handleReUploadSymbols(); return false;">
+                        <span class="dropdown-icon">🔄</span> Refresh Tokens and Symbols bases LTP
+                    </a>
+                    <a href="#" onclick="handleAddSymbols(); return false;">
+                        <span class="dropdown-icon">➕</span> From Excel available list : Addition Tokens and Symbols
+                    </a>
+                    <a href="#" onclick="handleAddStrikes(); return false;">
+                        <span class="dropdown-icon">➕</span> Strikes input from Excel : Addition of Tokens and Symbols
+                    </a>
+                    <a href="#" onclick="handleSubscribe(); return false;">
+                        <span class="dropdown-icon">📡</span> Strikes input from Excel : Remove existing and Subscribe input
+                    </a>
+                    <a href="#" onclick="openDirectStrikeModal(); return false;">
+                        <span class="dropdown-icon">🎯</span> Add or Remove Symbol directly bases strike input
+                    </a>
+                    <a href="#" onclick="handleMcxDownload(); return false;">
+                        <span class="dropdown-icon">🗂️</span> Click here to download MCX reports at path
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    </nav>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- ============================================================
+         Orders Modal — shared across all pages (opened via Actions dropdown)
+         ============================================================ -->
+    <div class="orders-modal" id="ordersModal" style="display:none;">
+        <div class="orders-content">
+            <div class="orders-header">
+                <h2>📋 Order History</h2>
+                <button class="orders-close-btn" onclick="closeOrdersModal()">✕</button>
+            </div>
+
+            <div class="orders-controls">
+                <div class="orders-user-select">
+                    <label for="ordersUserSelect">Select User:</label>
+                    <select id="ordersUserSelect" class="orders-dropdown" onchange="handleOrdersUserChange()">
+                        <option value="client1">Client 1</option>
+                        <option value="client2">Client 2</option>
+                    </select>
+                </div>
+                <div class="orders-filters">
+                    <button class="filter-btn active" onclick="filterOrders('all')">All</button>
+                    <button class="filter-btn" onclick="filterOrders('SUCCESS')">Success</button>
+                    <button class="filter-btn" onclick="filterOrders('REJECTED')">Rejected</button>
+                    <button class="filter-btn" onclick="filterOrders('PENDING')">Pending</button>
+                </div>
+            </div>
+
+            <div class="orders-table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order No</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Action</th>
+                            <th>Order Type</th>
+                            <th>Price</th>
+                            <th>Lots</th>
+                            <th>Qty</th>
+                            <th>Time</th>
+                            <th>Avg Price</th>
+                            <th>Status</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="12" style="text-align:center;padding:30px;">
+                                Loading orders...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="orders-footer">
+                <div class="orders-summary">
+                    <span id="ordersSummary">Total: 0 orders</span>
+                </div>
+                <div class="orders-actions">
+                    <button class="orders-btn orders-btn-refresh" onclick="refreshOrders()">🔄 Refresh</button>
+                    <button class="orders-btn orders-btn-close" onclick="closeOrdersModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         Direct Strike Add / Remove Modal — shared across all pages
+         ============================================================ -->
+    <div class="dsa-overlay" id="dsaOverlay" onclick="handleDsaOverlayClick(event)">
+        <div class="dsa-modal" id="dsaModal" role="dialog" aria-modal="true" aria-labelledby="dsaTitle">
+
+            <div class="dsa-header">
+                <span class="dsa-header-icon">🎯</span>
+                <h2 class="dsa-title" id="dsaTitle">Direct Symbol Add and Remove by Strike</h2>
+                <button class="dsa-close-btn" onclick="closeDirectStrikeModal()" aria-label="Close">✕</button>
+            </div>
+
+            <div class="dsa-body">
+                <p class="dsa-description" id="dsaDescription">
+                    Enter a strike price and select the option type.
+                    Choose Add or Remove from your watchlist via the API.
+                </p>
+                <div class="dsa-input-row">
+                    <div class="dsa-field dsa-field-strike">
+                        <label class="dsa-label" for="dsaStrikeInput">Strike Price</label>
+                        <input
+                            id="dsaStrikeInput"
+                            class="dsa-input"
+                            type="number"
+                            min="0"
+                            step="50"
+                            placeholder="e.g. 24500"
+                            autocomplete="off"
+                        />
+                    </div>
+                    <div class="dsa-field dsa-field-type">
+                        <label class="dsa-label" for="dsaOptionType">Option Type</label>
+                        <select id="dsaOptionType" class="dsa-select">
+                            <option value="CE">CE</option>
+                            <option value="PE">PE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dsa-status" id="dsaStatus"></div>
+            </div>
+
+            <div class="dsa-footer">
+                <button class="dsa-btn dsa-btn-add" id="dsaAddBtn" onclick="submitDirectStrike()">
+                    <span id="dsaAddBtnText">➕ Add Symbol</span>
+                    <span id="dsaAddBtnSpinner" class="dsa-spinner" style="display:none;"></span>
+                </button>
+                <button class="dsa-btn dsa-btn-del" id="dsaDelBtn" onclick="submitDelStrike()">
+                    <span id="dsaDelBtnText">🗑️ Remove Symbol</span>
+                    <span id="dsaDelBtnSpinner" class="dsa-spinner" style="display:none;"></span>
+                </button>
+                <button class="dsa-btn dsa-btn-cancel" onclick="closeDirectStrikeModal()">Close</button>
+            </div>
+
+        </div>
+    </div>
+    <!-- END shared modals -->
+
+    <!-- Common JavaScript -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    
+    <!-- Page-specific JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

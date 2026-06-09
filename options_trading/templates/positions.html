@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}Positions - v3.2{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/positions.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- [FIX-5] pos-container does NOT wrap the modals.
+     overflow:hidden on container was clipping modal overlays and blocking
+     pointer-events on table rows near the edges. Modals are after the container. -->
+<div class="pos-container">
+
+    <!-- ── Status Bar ── -->
+    <div class="pos-status-bar">
+        <div class="pos-status-left">
+            <span class="refresh-indicator"></span>
+            Auto-refreshing every 5s &nbsp;|&nbsp; Last update: <span id="posLastUpdate">Never</span>
+            <span id="posUserPill" class="user-pill pill-old" style="margin-left:12px;">Old User</span>
+        </div>
+        <div class="pos-status-right">
+            <span class="pos-stat-chip pos-stat-pnl" id="totalMtmChip">
+                Unrealised: <strong id="totalMtm">—</strong>
+            </span>
+            <span class="pos-stat-chip pos-stat-realized" id="totalRealizedChip">
+                Realised: <strong id="totalRealized">—</strong>
+            </span>
+            <span class="pos-stat-chip pos-stat-margin">
+                <strong id="posOpenCount">Open: —</strong>
+            </span>
+        </div>
+    </div>
+
+    <!-- ── Tab Nav ── -->
+    <div class="pos-tab-nav">
+        <button class="pos-tab-btn active" onclick="switchTab(0)">
+            📋 Positions <span class="pos-tab-badge" id="positionsBadge">0</span>
+        </button>
+        <button class="pos-tab-btn" onclick="switchTab(1)">
+            🕐 Trade History <span class="pos-tab-badge" id="historyBadge">0</span>
+        </button>
+        <button class="pos-tab-btn" onclick="switchTab(2)">
+            📊 Order Report <span class="pos-tab-badge" id="reportBadge">0</span>
+        </button>
+        <div class="pos-tab-actions">
+            <button class="pos-action-btn pos-btn-refresh"
+                    onclick="loadPositions(); loadTradeHistory(); loadOrderReport();">
+                🔄 Refresh All
+            </button>
+            <button class="pos-action-btn pos-btn-squareoff" onclick="handleSquareOffAll()">
+                ⚡ Square Off All
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════ TAB 0 — POSITIONS ════════ -->
+    <div class="pos-tab-panel active" id="tabPanel0">
+
+        <div class="pos-toolbar">
+            <div class="pos-toolbar-left">
+                <label class="pos-filter-label">Filter:</label>
+                <select id="posExchangeFilter" class="pos-filter-select" onchange="applyPositionFilters()">
+                    <option value="all">All Exchanges</option>
+                    <option value="nse_fo">NSE FO</option>
+                    <option value="bse_fo">BSE FO</option>
+                    <option value="nse_cm">NSE Cash</option>
+                </select>
+                <select id="posProdFilter" class="pos-filter-select" onchange="applyPositionFilters()">
+                    <option value="all">All Products</option>
+                    <option value="NRML">NRML</option>
+                    <option value="MIS">MIS</option>
+                    <option value="CNC">CNC</option>
+                </select>
+                <select id="posOptFilter" class="pos-filter-select" onchange="applyPositionFilters()">
+                    <option value="all">All Types</option>
+                    <option value="CE">CE</option>
+                    <option value="PE">PE</option>
+                    <option value="FUT">FUT</option>
+                </select>
+                <select id="posDirFilter" class="pos-filter-select" onchange="applyPositionFilters()">
+                    <option value="all">All Directions</option>
+                    <option value="LONG">LONG</option>
+                    <option value="SHORT">SHORT</option>
+                    <option value="CLOSED">CLOSED</option>
+                </select>
+            </div>
+            <div class="pos-toolbar-right">
+                <span class="pos-count-label">
+                    Showing <strong id="posVisibleCount">0</strong> / <strong id="posTotalCount">0</strong>
+                </span>
+            </div>
+        </div>
+
+        <div class="pos-table-wrap">
+            <table class="pos-table">
+                <thead>
+                    <tr>
+                        <th style="width:34px;text-align:center;">
+                            <input type="checkbox" id="posSelectAll"
+                                   title="Select / deselect all"
+                                   onchange="toggleSelectAllPositions(this)">
+                        </th>
+                        <th>Symbol</th>
+                        <th>Strike</th>
+                        <th>Opt</th>
+                        <th>Segment</th>
+                        <th>Product</th>
+                        <th>Direction</th>
+                        <th class="num">Net Qty</th>
+                        <th class="num">Lots</th>
+                        <th class="num">Buy / Sell Qty</th>
+                        <th class="num">Avg Buy / Sell</th>
+                        <th class="num">LTP</th>
+                        <th class="num">Unrealised P&L</th>
+                        <th class="num">Realised P&L</th>
+                        <th class="num">Total P&L</th>
+                        <th>Expiry</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="positionsTableBody">
+                    <tr>
+                        <td colspan="17" class="pos-loading">
+                            <div class="pos-spinner"></div>Loading positions…
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary footer -->
+        <div class="pos-summary-bar">
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Net Traded Value</span>
+                <span class="pos-summary-val" id="sumNetTraded">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Unrealised P&L</span>
+                <span class="pos-summary-val" id="sumUnrealised">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Realised P&L</span>
+                <span class="pos-summary-val" id="sumRealised">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Total P&L</span>
+                <span class="pos-summary-val pos-total-pnl" id="sumTotalPnl">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Open Positions</span>
+                <span class="pos-summary-val" id="sumOpenPos">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Last Refresh</span>
+                <span class="pos-summary-val" style="font-size:12px;" id="sumLastRefresh">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════ TAB 1 — TRADE HISTORY ════════ -->
+    <div class="pos-tab-panel" id="tabPanel1">
+
+        <!-- Day KPI Cards — from day_summary{} -->
+        <div class="hist-kpi-bar">
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Gross P&L</div>
+                <div class="hist-kpi-val" id="histGrossPnl">—</div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Est. Charges</div>
+                <div class="hist-kpi-val" id="histEstCharges">—</div>
+            </div>
+            <div class="hist-kpi-card hist-kpi-highlight">
+                <div class="hist-kpi-label">Net P&L</div>
+                <div class="hist-kpi-val" id="histNetPnl">—</div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Total Lots</div>
+                <div class="hist-kpi-val" id="histTotalLots">—</div>
+                <div class="hist-kpi-sub">B:<span id="histBuyLots">—</span> S:<span id="histSellLots">—</span></div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Turnover</div>
+                <div class="hist-kpi-val" id="histTurnover">—</div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Fills / Symbols</div>
+                <div class="hist-kpi-val"><span id="histFills">—</span> / <span id="histSymbols">—</span></div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Win Rate</div>
+                <div class="hist-kpi-val" id="histWinRate">—</div>
+                <div class="hist-kpi-sub">W:<span id="histWinners">—</span> L:<span id="histLosers">—</span></div>
+            </div>
+            <div class="hist-kpi-card">
+                <div class="hist-kpi-label">Profit Factor</div>
+                <div class="hist-kpi-val" id="histProfitFactor">—</div>
+            </div>
+            <div class="hist-kpi-card hist-kpi-best">
+                <div class="hist-kpi-label">Best Trade</div>
+                <div class="hist-kpi-sym" id="histBestSym">—</div>
+                <div class="hist-kpi-val pnl-pos" id="histBestPnl">—</div>
+            </div>
+            <div class="hist-kpi-card hist-kpi-worst">
+                <div class="hist-kpi-label">Worst Trade</div>
+                <div class="hist-kpi-sym" id="histWorstSym">—</div>
+                <div class="hist-kpi-val pnl-neg" id="histWorstPnl">—</div>
+            </div>
+        </div>
+
+        <!-- Filters + Sub-tab switcher -->
+        <div class="pos-toolbar">
+            <div class="pos-toolbar-left">
+                <!-- Sub-tab chips -->
+                <button class="hist-sub-btn active" data-tab="symbol" onclick="switchHistSubTab('symbol')">📊 Symbol Summary</button>
+                <button class="hist-sub-btn" data-tab="log"    onclick="switchHistSubTab('log')">📋 Trade Log</button>
+                <button class="hist-sub-btn" data-tab="order"  onclick="switchHistSubTab('order')">🧾 Order Summary</button>
+                <span style="width:1px;background:#e2e8f0;margin:0 8px;align-self:stretch;"></span>
+                <label class="pos-filter-label">Filter:</label>
+                <select id="histOptFilter" class="pos-filter-select" onchange="applyHistoryFilters()">
+                    <option value="all">All Types</option>
+                    <option value="CE">CE</option>
+                    <option value="PE">PE</option>
+                    <option value="FUT">FUT</option>
+                </select>
+                <select id="histSideFilter" class="pos-filter-select" onchange="applyHistoryFilters()">
+                    <option value="all">Buy &amp; Sell</option>
+                    <option value="BUY">Buy</option>
+                    <option value="SELL">Sell</option>
+                </select>
+                <select id="histSymFilter" class="pos-filter-select" onchange="applyHistoryFilters()">
+                    <option value="all">All Symbols</option>
+                </select>
+            </div>
+            <div class="pos-toolbar-right">
+                <span class="pos-count-label">
+                    Showing <strong id="histVisibleCount">0</strong> / <strong id="histTotalCount">0</strong>
+                </span>
+                <button class="pos-action-btn pos-btn-export" onclick="exportHistoryCsv()">⬇ CSV</button>
+            </div>
+        </div>
+
+        <div class="pos-table-wrap">
+            <table class="pos-table">
+                <!-- JS swaps thead content per sub-tab via histTableHead -->
+                <thead id="histTableHead">
+                    <tr>
+                        <th>Symbol</th><th>Opt</th><th class="num">Strike</th>
+                        <th>Direction</th>
+                        <th class="num">Buy Qty</th><th class="num">Sell Qty</th><th class="num">Net Qty</th><th class="num">Net Lots</th>
+                        <th class="num">Avg Buy</th><th class="num">Avg Sell</th>
+                        <th class="num">Buy Val</th><th class="num">Sell Val</th>
+                        <th class="num">Realised P&L</th>
+                        <th>Fills</th><th>First</th><th>Last</th><th>Expiry</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="17" class="pos-loading">
+                        <div class="pos-spinner"></div>Loading trade history…
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ════════ TAB 2 — ORDER REPORT ════════ -->
+    <!-- data[] from OrderReportHelper: order_no, Process, symbol, trans_type,
+         Order_Type, Order_Price, Lots, Quantity, status, reason, Avg_Price, Time -->
+    <div class="pos-tab-panel" id="tabPanel2">
+        <div class="pos-toolbar">
+            <div class="pos-toolbar-left">
+                <label class="pos-filter-label">Status:</label>
+                <button class="pos-chip-btn active" data-status="all"       onclick="applyReportFilter(this,'all')">All</button>
+                <button class="pos-chip-btn"         data-status="complete"  onclick="applyReportFilter(this,'complete')">Complete</button>
+                <button class="pos-chip-btn"         data-status="open"      onclick="applyReportFilter(this,'open')">Open</button>
+                <button class="pos-chip-btn"         data-status="rejected"  onclick="applyReportFilter(this,'rejected')">Rejected</button>
+                <button class="pos-chip-btn"         data-status="cancelled" onclick="applyReportFilter(this,'cancelled')">Cancelled</button>
+                <button class="pos-chip-btn"         data-status="amo"       onclick="applyReportFilter(this,'amo')">AMO</button>
+            </div>
+            <div class="pos-toolbar-right">
+                <span class="pos-count-label">
+                    Showing <strong id="reportVisibleCount">0</strong> / <strong id="reportTotalCount">0</strong>
+                </span>
+                <button class="pos-action-btn pos-btn-refresh" onclick="loadOrderReport()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <div class="pos-table-wrap">
+            <table class="pos-table">
+                <thead>
+                    <tr>
+                        <!-- order_no -->
+                        <th>Order No</th>
+                        <!-- symbol + Process (strategy tag) -->
+                        <th>Symbol</th>
+                        <!-- trans_type: BUY / SELL -->
+                        <th>Side</th>
+                        <!-- Order_Type: MKT / L -->
+                        <th>Type</th>
+                        <!-- Order_Price -->
+                        <th class="num">Price</th>
+                        <!-- Avg_Price (fill price) -->
+                        <th class="num">Avg Fill</th>
+                        <!-- Lots -->
+                        <th class="num">Lots</th>
+                        <!-- Quantity -->
+                        <th class="num">Qty</th>
+                        <!-- status: OPEN/COMPLETE/REJECTED/CANCELLED/AMO -->
+                        <th>Status</th>
+                        <!-- reason / rejection message -->
+                        <th>Reason</th>
+                        <!-- Time -->
+                        <th>Time</th>
+                        <!-- Cancel button for OPEN orders -->
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody">
+                    <tr><td colspan="13" class="pos-loading">
+                        <div class="pos-spinner"></div>Loading orders…
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary footer — from OrderReportHelper summary{} -->
+        <div class="pos-summary-bar">
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Total Orders</span>
+                <span class="pos-summary-val" id="repSumTotal">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Complete</span>
+                <span class="pos-summary-val pos-complete" id="repSumComplete">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Open</span>
+                <span class="pos-summary-val pos-open" id="repSumOpen">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Rejected</span>
+                <span class="pos-summary-val pos-rejected" id="repSumRejected">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Cancelled</span>
+                <span class="pos-summary-val" id="repSumCancelled">—</span>
+            </div>
+            <div class="pos-summary-item">
+                <span class="pos-summary-label">Fill Rate</span>
+                <span class="pos-summary-val" id="repFillRate">—</span>
+            </div>
+        </div>
+    </div>
+
+</div><!-- END .pos-container -->
+
+<!-- ════════════════════════════════════════════════════
+     FLOATING BULK SQ-OFF BUTTON (outside container)
+     ════════════════════════════════════════════════════ -->
+<button class="pos-bulk-sqoff-btn" id="posBulkSqOffBtn"
+        style="display:none;" onclick="openBulkSqOff()">
+    ⚡ Sq Off Selected
+    <span class="pos-bulk-badge" id="posBulkCount">0</span>
+</button>
+
+<!-- ════════════════════════════════════════════════════
+     MODALS — all outside pos-container to avoid
+     overflow:hidden clipping pointer-events [FIX-5]
+     ════════════════════════════════════════════════════ -->
+
+<!-- Bulk Sq-Off confirm -->
+<div class="pos-modal-overlay" id="bulkSqOffModal">
+    <div class="pos-modal-box" style="max-width:780px;width:95%;">
+        <h2>⚡ Bulk Square Off</h2>
+        <p style="margin-bottom:10px;font-size:13px;">
+            Configure close parameters per position, then confirm:
+        </p>
+
+        <!-- Scrollable table with per-row controls -->
+        <div class="pos-modal-detail" id="bulkSqOffDetail"
+             style="max-height:340px;overflow-y:auto;padding:0;background:transparent;"></div>
+
+        <!-- Global quick-set row -->
+        <div class="sqoff-global-bar">
+            <span style="font-size:11px;font-weight:600;color:#718096;">Set all to:</span>
+            <button class="sqoff-global-btn" onclick="setBulkSqOffAll('MKT')">MKT</button>
+            <button class="sqoff-global-btn" onclick="setBulkSqOffAll('L')">LIMIT</button>
+            <button class="sqoff-global-btn sqoff-global-full" onclick="setBulkSqOffFull()">Full Qty</button>
+        </div>
+
+        <p class="pos-modal-warn" style="margin-top:8px;">
+            ⚠️ Orders execute immediately. Partial lots allowed — entered qty must not exceed net position.
+        </p>
+        <div class="pos-modal-btns">
+            <button class="pos-modal-btn pos-modal-cancel"  onclick="closeBulkSqOff()">Cancel</button>
+            <button class="pos-modal-btn pos-modal-confirm" onclick="confirmBulkSqOff()">⚡ Confirm Sq Off</button>
+        </div>
+    </div>
+</div>
+
+<!-- Square Off ALL confirm -->
+<div class="pos-modal-overlay" id="squareOffModal">
+    <div class="pos-modal-box">
+        <h2>⚡ Confirm Square Off All</h2>
+        <p>Market-close <strong>all open positions</strong> for <strong id="soUser">—</strong>.</p>
+        <p class="pos-modal-warn">⚠️ This action is irreversible. Proceed?</p>
+        <div class="pos-modal-btns">
+            <button class="pos-modal-btn pos-modal-cancel"  onclick="closeSquareOffModal()">Cancel</button>
+            <button class="pos-modal-btn pos-modal-confirm" onclick="confirmSquareOffAll()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Single Position Sq Off -->
+<div class="pos-modal-overlay" id="singleSqOffModal">
+    <div class="pos-modal-box" style="max-width:520px;">
+        <h2>⚡ Square Off Position</h2>
+
+        <!-- Position summary (populated by JS) -->
+        <div class="pos-modal-detail" id="singleSqOffDetail"></div>
+
+        <!-- ── Close controls ── -->
+        <div class="sqoff-controls">
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Lots to Close</label>
+                <div style="display:flex;align-items:center;gap:8px;flex:1;">
+                    <input type="number" id="singleSqOffLots"
+                           class="sqoff-ctrl-input"
+                           min="1" value="1"
+                           oninput="updateSingleSqOffQtyLabel()">
+                    <span id="singleSqOffQtyLabel" class="sqoff-qty-label">— qty</span>
+                    <span id="singleSqOffMaxLabel" class="sqoff-qty-label" style="margin-left:auto;"></span>
+                </div>
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Order Type</label>
+                <select id="singleSqOffType" class="sqoff-ctrl-select"
+                        onchange="handleSingleSqOffTypeChange()">
+                    <option value="MKT">MARKET</option>
+                    <option value="L">LIMIT</option>
+                </select>
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Limit Price</label>
+                <input type="number" id="singleSqOffPrice"
+                       class="sqoff-ctrl-input"
+                       min="0" step="0.05" value="0" disabled
+                       placeholder="Enter limit price">
+            </div>
+        </div>
+
+        <p class="pos-modal-warn" id="singleSqOffWarn">
+            ⚠️ Market orders execute immediately and are irreversible.
+        </p>
+        <div class="pos-modal-btns">
+            <button class="pos-modal-btn pos-modal-cancel"  onclick="closeSingleSqOff()">Cancel</button>
+            <button class="pos-modal-btn pos-modal-confirm" id="btnConfirmSingleSqOff" onclick="confirmSingleSqOff()">Confirm Sq Off</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     ADD TO POSITION  
+     Opens via ADD button in action column.
+     Calls POST /api/order (single order, same as dashboard).
+     ════════════════════════════════════════════════════ -->
+<div class="pos-modal-overlay" id="addPositionModal">
+    <div class="pos-modal-box" style="max-width:520px;">
+        <h2>➕ Add to Position</h2>
+
+        <!-- Position summary (populated by JS) -->
+        <div class="pos-modal-detail" id="addPositionDetail"></div>
+
+        <!-- ── Add-order controls ── -->
+        <div class="sqoff-controls">
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Side</label>
+                <select id="addPositionSide" class="sqoff-ctrl-select sqoff-side-select">
+                    <option value="BUY">BUY</option>
+                    <option value="SELL">SELL</option>
+                </select>
+                <span id="addPositionSideHint" class="sqoff-qty-label"
+                      style="margin-left:6px;"></span>
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Lots</label>
+                <div style="display:flex;align-items:center;gap:8px;flex:1;">
+                    <input type="number" id="addPositionLots"
+                           class="sqoff-ctrl-input"
+                           min="1" value="1"
+                           oninput="updateAddPositionQtyLabel()">
+                    <span id="addPositionQtyLabel" class="sqoff-qty-label">— qty</span>
+                </div>
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Order Type</label>
+                <select id="addPositionType" class="sqoff-ctrl-select"
+                        onchange="handleAddPositionTypeChange()">
+                    <option value="MKT">MARKET</option>
+                    <option value="L">LIMIT</option>
+                </select>
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Limit Price</label>
+                <input type="number" id="addPositionPrice"
+                       class="sqoff-ctrl-input"
+                       min="0" step="0.05" value="0" disabled
+                       placeholder="Enter limit price">
+            </div>
+            <div class="sqoff-ctrl-row">
+                <label class="sqoff-ctrl-label">Product</label>
+                <select id="addPositionProduct" class="sqoff-ctrl-select">
+                    <option value="NRML">NRML</option>
+                    <option value="MIS">MIS</option>
+                    <option value="CNC">CNC</option>
+                </select>
+            </div>
+        </div>
+
+        <p class="pos-modal-warn" id="addPositionWarn" style="color:#2b6cb0 !important;">
+            ℹ️ This will ADD to your existing position — not close it.
+        </p>
+        <div class="pos-modal-btns">
+            <button class="pos-modal-btn pos-modal-cancel" onclick="closeAddPosition()">Cancel</button>
+            <button class="pos-modal-btn pos-modal-confirm sqoff-add-confirm"
+                    id="btnConfirmAddPosition"                   
+                    onclick="confirmAddPosition()">➕ Place Order</button>
+        </div>
+    </div>
+</div>
+
+<!-- Result Modal — showModal / showModalBulk target -->
+<div class="modal" id="posResultModal">
+    <div class="modal-content">
+        <h2 id="posResultTitle">✅ Done</h2>
+        <p id="posResultMessage"></p>
+        <button class="modal-close" onclick="closePosResultModal()">OK</button>
+    </div>
+</div>
+
+<!-- ════════ Cancel Order Confirm Modal ════════ -->
+<div class="pos-modal-overlay" id="cancelOrderModal">
+    <div class="pos-modal-box" style="max-width:420px;">
+        <h2>✕ Cancel Order</h2>
+        <div class="pos-modal-detail" id="cancelOrderDetail"></div>
+        <p class="pos-modal-warn" style="margin-top:10px;">⚠️ This will send a cancel request. Already-filled qty will not be reversed.</p>
+        <div class="pos-modal-btns">
+            <button class="pos-modal-btn pos-modal-cancel"  onclick="closeCancelOrderModal()">Keep Order</button>
+            <button class="pos-modal-btn pos-modal-confirm" id="btnConfirmCancelOrder" onclick="confirmCancelOrder()">Confirm Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/positions.js') }}"></script>
+
+{% endblock %}

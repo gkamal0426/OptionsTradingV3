@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}Analytics - v3.2{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ana-container">
+
+    <!-- ══════════ TAB NAV ══════════ -->
+    <div class="ana-tab-nav">
+        <button class="ana-tab-btn active" onclick="switchAnaTab(0)">📊 Put-Call Ratio</button>
+        <button class="ana-tab-btn"        onclick="switchAnaTab(1)">📈 OI Change</button>
+        <button class="ana-tab-btn"        onclick="switchAnaTab(2)">📉 In Process</button>
+    </div>
+
+    <!-- ══════════ TAB 0 — PCR ══════════ -->
+    <div class="ana-tab-panel active" id="anaPanel0">
+
+        <div class="ana-status-bar">
+            <div class="ana-status-left">
+                <span class="refresh-indicator"></span>
+                PCR Monitor &nbsp;|&nbsp;
+                Last update: <span id="lastUpdate">Never</span>
+                &nbsp;|&nbsp;
+                <span id="pcrStatusDot">⚫ Stopped</span>
+            </div>
+            <div class="ana-status-right">
+                <label class="ana-ctrl-label">Index:</label>
+                <select id="pcrIndexSelect" class="ana-select">
+                    <option value="26000">NIFTY</option>
+                    <option value="26009">BANKNIFTY</option>
+                    <option value="1">SENSEX</option>
+                </select>
+                <label class="ana-ctrl-label">ITM Strikes:</label>
+                <input type="number" id="itmstrikes" class="ana-number-input" value="5" min="1" max="20">
+                <label class="ana-ctrl-label">OTM Strikes:</label>
+                <input type="number" id="otmstrikes" class="ana-number-input" value="15" min="1" max="50">
+                <label class="ana-ctrl-label">Date:</label>
+                <input type="date" id="dateFilter" class="ana-date-input">
+                <button class="ana-btn ana-btn-load"  onclick="loadPCR()">🔄 Load</button>
+                <button class="ana-btn ana-btn-start" onclick="startPCR()">▶ Start</button>
+                <button class="ana-btn ana-btn-stop"  onclick="stopPCR()">■ Stop</button>
+            </div>
+        </div>
+
+        <div class="pcr-live-summary" id="pcrLiveSummary" style="display:none;">
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Index</span>
+                <span class="pcr-sum-val pcr-sum-index" id="sumIndex">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">LTP</span>
+                <span class="pcr-sum-val" id="sumLtp">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Call OI</span>
+                <span class="pcr-sum-val pcr-sum-call" id="sumCallOi">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Put OI</span>
+                <span class="pcr-sum-val pcr-sum-put" id="sumPutOi">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block pcr-sum-hl">
+                <span class="pcr-sum-label">PCR</span>
+                <span class="pcr-sum-val" id="sumPcr">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Direction</span>
+                <span class="pcr-sum-val" id="sumDirection">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Readings</span>
+                <span class="pcr-sum-val" id="sumReadings">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Last at</span>
+                <span class="pcr-sum-val pcr-sum-time" id="sumTime">—</span>
+            </div>
+        </div>
+
+        <div class="ana-table-wrap">
+            <table class="ana-table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>Time</th><th>LTP</th>
+                        <th>Call OI</th><th>Put OI</th><th>PCR</th>
+                        <th>Direction</th><th>Strikes</th>
+                    </tr>
+                </thead>
+                <tbody id="pcrTableBody">
+                    <tr class="ana-empty-row">
+                        <td colspan="8">Select index + date, then click Load — or click Start to begin capturing live data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div><!-- /TAB 0 -->
+
+    <!-- ══════════ TAB 1 — OI CHANGE ══════════ -->
+    <div class="ana-tab-panel" id="anaPanel1">
+
+        <div class="ana-status-bar">
+            <div class="ana-status-left">
+                <span class="refresh-indicator"></span>
+                OI Change Monitor &nbsp;|&nbsp;
+                Last update: <span id="oicLastUpdate">Never</span>
+            </div>
+            <div class="ana-status-right">
+                <span style="font-size:12px;color:#94a3b8;">
+                    Data shared from PCR tab — use Load / Start controls there
+                </span>
+            </div>
+        </div>
+
+        <!-- OIC Summary Strip -->
+        <div class="oic-live-summary" id="oicLiveSummary" style="display:none;">
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Call OI Chg</span>
+                <span class="pcr-sum-val" id="oicSumCallChg">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Put OI Chg</span>
+                <span class="pcr-sum-val" id="oicSumPutChg">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block oic-sum-hl">
+                <span class="pcr-sum-label">Net OI Chg</span>
+                <span class="pcr-sum-val" id="oicSumNetChg">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Top CE Builder</span>
+                <span class="pcr-sum-val oic-builder-strike" id="oicSumCeStrike">—</span>
+                <span class="pcr-sum-label oic-builder-chg" id="oicSumCeChg">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Top PE Builder</span>
+                <span class="pcr-sum-val oic-builder-strike" id="oicSumPeStrike">—</span>
+                <span class="pcr-sum-label oic-builder-chg" id="oicSumPeChg">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Direction</span>
+                <span class="pcr-sum-val" id="oicSumDirection">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Readings</span>
+                <span class="pcr-sum-val" id="oicSumReadings">—</span>
+            </div>
+            <div class="pcr-sum-sep"></div>
+            <div class="pcr-sum-block">
+                <span class="pcr-sum-label">Last at</span>
+                <span class="pcr-sum-val pcr-sum-time" id="oicSumTime">—</span>
+            </div>
+        </div>
+
+        <!-- OIC History Table -->
+        <div class="ana-table-wrap">
+            <table class="ana-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Time</th>
+                        <th>LTP</th>
+                        <th>Call OI Chg</th>
+                        <th>Put OI Chg</th>
+                        <th>Net Chg</th>
+                        <th>Direction</th>
+                        <th>Strikes</th>
+                    </tr>
+                </thead>
+                <tbody id="oicTableBody">
+                    <tr class="ana-empty-row">
+                        <td colspan="8">Load data from the PCR tab first</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div><!-- /TAB 1 -->
+
+    <div class="ana-tab-panel" id="anaPanel2">
+        <div class="ana-placeholder">📉 Coming soon</div>
+    </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PCR — STRIKE DETAIL MODAL
+     ════════════════════════════════════════════════ -->
+<div class="ana-modal-overlay" id="strikeModal"
+     onclick="if(event.target===this) closeStrikeModal()">
+    <div class="ana-modal-box">
+
+        <div class="ana-modal-header">
+            <span class="ana-modal-title-text">
+                📊 Strike Detail — <span id="strikeModalTitle"></span>
+            </span>
+            <button class="ana-modal-header-close" onclick="closeStrikeModal()" title="Close">✕</button>
+        </div>
+
+        <div class="ana-modal-tab-nav">
+            <button class="ana-modal-tab active" onclick="switchStrikeTab(0)">📋 Table</button>
+            <button class="ana-modal-tab"        onclick="switchStrikeTab(1)">📊 OI Chart</button>
+        </div>
+
+        <div class="ana-modal-tab-panel active" id="strikeTabPanel0">
+            <div class="ana-modal-table-wrap">
+                <table class="ana-table">
+                    <thead>
+                        <tr>
+                            <th>Strike</th><th>Type</th><th>Symbol</th>
+                            <th class="num">Open Interest</th><th class="num">Lot Size</th>
+                        </tr>
+                    </thead>
+                    <tbody id="strikeModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="ana-modal-tab-panel" id="strikeTabPanel1">
+            <div class="strike-chart-legend">
+                <span class="strike-legend-dot pe"></span><span>Put OI</span>
+                <span class="strike-legend-dot ce"></span><span>Call OI</span>
+            </div>
+            <div class="strike-chart-scroll-wrap">
+                <div id="strikeOiChart" class="strike-oi-chart"></div>
+            </div>
+        </div>
+
+        <div class="ana-modal-btns">
+            <button class="ana-modal-btn ana-modal-cancel" onclick="closeStrikeModal()">Close</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     OIC — STRIKE OI CHANGE MODAL
+     ════════════════════════════════════════════════ -->
+<div class="ana-modal-overlay" id="oicModal"
+     onclick="if(event.target===this) closeOicModal()">
+    <div class="ana-modal-box oic-modal-wide">
+
+        <div class="ana-modal-header">
+            <span class="ana-modal-title-text">
+                📈 OI Change Detail — <span id="oicModalTitle"></span>
+            </span>
+            <button class="ana-modal-header-close" onclick="closeOicModal()" title="Close">✕</button>
+        </div>
+
+        <div class="ana-modal-tab-nav">
+            <button class="ana-modal-tab active" onclick="switchOicTab(0)">📋 Table</button>
+            <button class="ana-modal-tab"        onclick="switchOicTab(1)">📊 Change Chart</button>
+        </div>
+
+        <!-- OIC Table Tab -->
+        <div class="ana-modal-tab-panel active" id="oicTabPanel0">
+            <div class="ana-modal-table-wrap">
+                <table class="ana-table">
+                    <thead>
+                        <tr>
+                            <th>Strike</th>
+                            <th>Type</th>
+                            <th>Symbol</th>
+                            <th class="num">Current OI</th>
+                            <th class="num">Backup OI</th>
+                            <th class="num">OI Change</th>
+                            <th class="num">Chg %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="oicModalBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- OIC Chart Tab -->
+        <div class="ana-modal-tab-panel" id="oicTabPanel1">
+            <div class="oic-chart-legend">
+                <span class="strike-legend-dot pe"></span><span>PE Change</span>
+                <span class="strike-legend-dot ce"></span><span>CE Change</span>
+                <span class="oic-legend-note">Solid = OI added &nbsp;|&nbsp; Faded = OI shed</span>
+            </div>
+            <div class="oic-chart-wrap">
+                <canvas id="oicChartCanvas"
+                        role="img"
+                        aria-label="Bar chart showing PE and CE open interest change per strike">
+                    OI change per strike.
+                </canvas>
+            </div>
+        </div>
+
+        <div class="ana-modal-btns">
+            <button class="ana-modal-btn ana-modal-cancel" onclick="closeOicModal()">Close</button>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

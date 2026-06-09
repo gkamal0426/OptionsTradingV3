@@ -1,0 +1,32 @@
+rounding_map:
+  "26000": 50
+  "26009": 100
+  "1": 100
+index_name: null
+lotsize: 1
+instltp: 0
+tokens_and_symbols: []
+tokens_list: []
+master_file: null
+ne_file: null
+next_ne_file: null
+segments:
+  nse_fo:
+    instruments: ["26000", "26009", "26013", "26037", "26074"]
+    report_day: 2
+  bse_fo:
+    instruments: ["1", "12", "47"]
+    report_day: 4
+  mcx_fo:
+    instruments: ["401", "117", "115", "122", "294", "114"]
+    report_day: 1
+direction:
+  Strong BULLISH: 1.4
+  BULLISH: 1.25
+  Mild BULLISH: 1.1
+  Neutral: 0.91
+  Mild BEARISH: 0.8
+  BEARISH: 0.71
+  Strong BEARISH: 0
+pcr_start: '9:15'
+pcr_end: '15:32'

@@ -1,0 +1,805 @@
+{% extends "base.html" %}
+
+{% block title %}Strategies - v3.3{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/strategy.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="strat-container">
+
+    <!-- ── Status Bar (mirrors dashboard/positions auto-refresh bar) ── -->
+    <div class="strat-page-header">
+        <div class="strat-header-left">
+            <span class="strat-title">🎯 Strategy Engine</span>
+            <span class="live-pill"><span class="pulse"></span>LIVE</span>
+            <span class="last-refresh-label">Last refresh: <span id="stratLastRefresh">--:--:--</span></span>
+            <span id="stratUserPill" class="user-pill pill-old">Old User</span>
+        </div>
+        <div class="strat-header-right">
+            <button class="strat-header-btn btn-strat-refresh" onclick="refreshAllStrategies()">🔄 Refresh</button>
+            <button class="strat-header-btn btn-strat-panic"   onclick="panicSwitch()">🚨 PANIC</button>
+        </div>
+    </div>
+
+    <!-- ── Tab Navigation (matches positions page) ── -->
+    <div class="strat-tab-nav">
+        <button class="strat-tab-btn active" data-tab="builder" onclick="switchStratTab('builder')">🔧 Custom Builder</button>
+        <button class="strat-tab-btn"        data-tab="deploy"  onclick="switchStratTab('deploy')">🚀 Deploy Strategy</button>
+        <button class="strat-tab-btn"        data-tab="active"  onclick="switchStratTab('active')">⚡ Active Strategies</button>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 1 — CUSTOM BUILDER
+         ═══════════════════════════════════════════════════════ -->
+    <div id="builder-tab" class="strat-tab-content active">
+        <div class="builder-wrap">
+            <div class="builder-header">
+                <h2>🔧 Custom Strategy Builder</h2>
+                <span class="builder-hint">Compose any multi-leg strategy. Add up to 8 legs.</span>
+            </div>
+
+            <!-- Config Row -->
+            <div class="builder-config-row">
+                <div class="param-field">
+                    <label class="param-label">Strategy Name</label>
+                    <input type="text" id="cb-name" class="param-input" placeholder="My Custom Strategy">
+                </div>
+                <div class="param-field">
+                    <label class="param-label">Underlying</label>
+                    <select id="cb-underlying" class="param-select" onchange="loadStrikes('cb')">
+                        <option value="26000">NIFTY</option>
+                        <option value="26009">BANKNIFTY</option>
+                        <option value="26013">FINNIFTY</option>
+                        <option value="26037">MIDCPNIFTY</option>
+                        <option value="1">SENSEX</option>
+                        <option value="12">BANKEX</option>
+                    </select>
+                </div>
+                <div class="param-field">
+                    <label class="param-label">Expiry</label>
+                    <select id="cb-expiry-type" class="param-select" onchange="loadStrikes('cb')">
+                        <option value="nearest">Nearest</option>
+                        <option value="next">Next Nearest</option>
+                    </select>
+                </div>
+                <div class="param-field expiry-field">
+                    <label class="param-label">&nbsp;</label>
+                    <span class="expiry-display" id="cb-expiry-label">—</span>
+                </div>
+                <div class="param-field">
+                    <label class="param-label">Default Lots</label>
+                    <input type="number" id="cb-lots" class="param-input" value="1" min="1" oninput="syncAllLegLots()">
+                </div>
+            </div>
+
+            <!-- Legs Table -->
+            <div class="builder-legs-wrap">
+                <table class="builder-legs-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Action</th><th>Strike</th><th>Opt</th>
+                            <th>Lots</th><th>Order Type</th><th>Limit Price</th>
+                            <th>LTP</th><th>Est. Value</th><th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="builderLegsBody">
+                        <tr class="builder-leg-row" data-leg="0">
+                            <td class="leg-num">1</td>
+                            <td><select class="param-select leg-action-sel" onchange="updateBuilderPayoff()">
+                                <option value="SELL">SELL</option>
+                                <option value="BUY">BUY</option>
+                            </select></td>
+                            <td><select class="param-select leg-strike-sel" onchange="updateLegLtp(this)"></select></td>
+                            <td><select class="param-select leg-opttype-sel" onchange="updateLegLtp(this)">
+                                <option value="CE">CE</option>
+                                <option value="PE">PE</option>
+                            </select></td>
+                            <td><input type="number" class="param-input leg-lots-inp" value="1" min="1" style="width:58px;" oninput="updateBuilderPayoff()"></td>
+                            <td><select class="param-select leg-otype-sel">
+                                <option value="MKT">MKT</option>
+                                <option value="L">LMT</option>
+                            </select></td>
+                            <td><input type="number" class="param-input leg-price-inp" value="0" step="0.05" style="width:72px;"></td>
+                            <td class="leg-ltp-cell">—</td>
+                            <td class="leg-val-cell">—</td>
+                            <td><button class="remove-leg-btn" onclick="removeLeg(this)">✕</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="add-leg-btn" onclick="addLeg()">＋ Add Leg</button>
+            </div>
+
+            <!-- Payoff Summary -->
+            <div class="builder-payoff">
+                <div class="payoff-card">
+                    <div class="payoff-label">Net Premium</div>
+                    <div class="payoff-val" id="cb-net-premium">—</div>
+                </div>
+                <div class="payoff-card">
+                    <div class="payoff-label">Max Profit</div>
+                    <div class="payoff-val positive" id="cb-max-profit">—</div>
+                </div>
+                <div class="payoff-card">
+                    <div class="payoff-label">Max Loss</div>
+                    <div class="payoff-val negative" id="cb-max-loss">—</div>
+                </div>
+                <div class="payoff-card">
+                    <div class="payoff-label">Total Legs</div>
+                    <div class="payoff-val neutral" id="cb-total-legs">1</div>
+                </div>
+            </div>
+
+            <div class="builder-actions">
+                <button class="strat-btn btn-deploy" onclick="deployCustomStrategy()">🚀 Deploy Custom Strategy</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 2 — DEPLOY STRATEGY
+         ═══════════════════════════════════════════════════════ -->
+    <div id="deploy-tab" class="strat-tab-content">
+        <div class="strategy-grid">
+
+            <!-- ─── STRADDLE ─── -->
+            <div class="strategy-card" id="card-straddle">
+                <div class="card-header">
+                    <div class="card-icon">⚖️</div>
+                    <div class="card-meta">
+                        <div class="card-name">Short Straddle</div>
+                        <div class="card-subtitle">Sell ATM CE + PE simultaneously</div>
+                    </div>
+                    <div class="card-badge badge-neutral">Neutral</div>
+                </div>
+                <div class="card-params">
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Underlying</label>
+                            <select id="sd-underlying" class="param-select" onchange="loadStrikes('sd')">
+                                <option value="26000">NIFTY</option><option value="26009">BANKNIFTY</option>
+                                <option value="26013">FINNIFTY</option><option value="26037">MIDCPNIFTY</option>
+                                <option value="1">SENSEX</option><option value="12">BANKEX</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Expiry</label>
+                            <select id="sd-expiry-type" class="param-select" onchange="loadStrikes('sd')">
+                                <option value="nearest">Nearest</option>
+                                <option value="next">Next Nearest</option>
+                            </select>
+                        </div>
+                        <div class="param-field expiry-field">
+                            <label class="param-label">&nbsp;</label>
+                            <span class="expiry-display" id="sd-expiry-label">—</span>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Strike (ATM)</label>
+                            <select id="sd-strike" class="param-select"><option>Loading…</option></select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Lots</label>
+                            <input type="number" id="sd-lots" class="param-input" value="1" min="1" max="100">
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Order Type</label>
+                            <select id="sd-order-type" class="param-select">
+                                <option value="MKT">Market</option><option value="L">Limit</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Limit Price (each leg)</label>
+                            <input type="number" id="sd-limit-price" class="param-input" value="0" step="0.05">
+                        </div>
+                    </div>
+                    <!-- SL Section -->
+                    <div class="param-row sl-section-divider">
+                        <div class="param-field full-width">
+                            <label class="param-label">Stop Loss Type</label>
+                            <div class="sl-type-group">
+                                <label class="radio-label"><input type="radio" name="sd-sl-type" value="none" checked> None</label>
+                                <label class="radio-label"><input type="radio" name="sd-sl-type" value="combined_points"> Combined Pts</label>
+                                <label class="radio-label"><input type="radio" name="sd-sl-type" value="combined_pct"> Combined %</label>
+                                <label class="radio-label"><input type="radio" name="sd-sl-type" value="individual"> Leg (pts)</label>
+                                <label class="radio-label"><input type="radio" name="sd-sl-type" value="individual_pct"> Leg %</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="param-row" id="sd-sl-params" style="display:none;">
+                        <div class="param-field">
+                            <label class="param-label">SL Points</label>
+                            <input type="number" id="sd-sl-value" class="param-input" value="50" step="1" min="0">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">SL %</label>
+                            <input type="number" id="sd-sl-pct" class="param-input" value="30" step="0.5" min="0">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Target (pts)</label>
+                            <input type="number" id="sd-target" class="param-input" value="0" step="1" min="0">
+                        </div>
+                    </div>
+                    <div class="param-row" id="sd-trail-row" style="display:none;">
+                        <div class="param-field">
+                            <label class="trail-checkbox-label">
+                                <input type="checkbox" id="sd-trail-sl"> Enable Trail SL
+                            </label>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Trail Step (pts)</label>
+                            <input type="number" id="sd-trail-step" class="param-input" value="10" step="1" min="1">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-preview">
+                    <div class="preview-title">📋 Order Preview</div>
+                    <div class="preview-legs">
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="sd-ce-desc">— CE</span>
+                            <span class="leg-ltp" id="sd-ce-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="sd-pe-desc">— PE</span>
+                            <span class="leg-ltp" id="sd-pe-ltp">LTP: —</span>
+                        </div>
+                    </div>
+                    <div class="preview-premium">
+                        Premium: <strong id="sd-total-premium">—</strong> &nbsp;|&nbsp;
+                        Max Profit: <strong id="sd-max-profit">—</strong>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="strat-btn btn-preview" onclick="previewStrategy('straddle')">👁 Preview</button>
+                    <button class="strat-btn btn-deploy"  onclick="deployStrategy('straddle')">🚀 Deploy</button>
+                </div>
+            </div><!-- /straddle -->
+
+
+            <!-- ─── STRANGLE ─── -->
+            <div class="strategy-card" id="card-strangle">
+                <div class="card-header">
+                    <div class="card-icon">🤸</div>
+                    <div class="card-meta">
+                        <div class="card-name">Short Strangle</div>
+                        <div class="card-subtitle">Sell OTM CE + PE with defined width</div>
+                    </div>
+                    <div class="card-badge badge-neutral">Neutral</div>
+                </div>
+                <div class="card-params">
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Underlying</label>
+                            <select id="sg-underlying" class="param-select" onchange="loadStrikes('sg')">
+                                <option value="26000">NIFTY</option><option value="26009">BANKNIFTY</option>
+                                <option value="26013">FINNIFTY</option><option value="26037">MIDCPNIFTY</option>
+                                <option value="1">SENSEX</option><option value="12">BANKEX</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Expiry</label>
+                            <select id="sg-expiry-type" class="param-select" onchange="loadStrikes('sg')">
+                                <option value="nearest">Nearest</option>
+                                <option value="next">Next Nearest</option>
+                            </select>
+                        </div>
+                        <div class="param-field expiry-field">
+                            <label class="param-label">&nbsp;</label>
+                            <span class="expiry-display" id="sg-expiry-label">—</span>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">CE Strike (OTM)</label>
+                            <select id="sg-ce-strike" class="param-select"></select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">PE Strike (OTM)</label>
+                            <select id="sg-pe-strike" class="param-select"></select>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Lots</label>
+                            <input type="number" id="sg-lots" class="param-input" value="1" min="1">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Order Type</label>
+                            <select id="sg-order-type" class="param-select">
+                                <option value="MKT">Market</option><option value="L">Limit</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Limit Price</label>
+                            <input type="number" id="sg-limit-price" class="param-input" value="0" step="0.05">
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field full-width">
+                            <label class="param-label">Width (strikes from ATM)</label>
+                            <div class="width-slider-wrap">
+                                <input type="range" id="sg-width" class="width-slider" min="1" max="20" value="2"
+                                    oninput="updateStrangleWidth(this.value)">
+                                <span class="slider-val" id="sg-width-val">2</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="param-row sl-section-divider">
+                        <div class="param-field full-width">
+                            <label class="param-label">Stop Loss Type</label>
+                            <div class="sl-type-group">
+                                <label class="radio-label"><input type="radio" name="sg-sl-type" value="none" checked> None</label>
+                                <label class="radio-label"><input type="radio" name="sg-sl-type" value="combined_points"> Combined Pts</label>
+                                <label class="radio-label"><input type="radio" name="sg-sl-type" value="combined_pct"> Combined %</label>
+                                <label class="radio-label"><input type="radio" name="sg-sl-type" value="individual"> Leg (pts)</label>
+                                <label class="radio-label"><input type="radio" name="sg-sl-type" value="individual_pct"> Leg %</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="param-row" id="sg-sl-params" style="display:none;">
+                        <div class="param-field">
+                            <label class="param-label">SL Points</label>
+                            <input type="number" id="sg-sl-value" class="param-input" value="50" step="1" min="0">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">SL %</label>
+                            <input type="number" id="sg-sl-pct" class="param-input" value="30" step="0.5" min="0">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Target (pts)</label>
+                            <input type="number" id="sg-target" class="param-input" value="0" step="1" min="0">
+                        </div>
+                    </div>
+                    <div class="param-row" id="sg-trail-row" style="display:none;">
+                        <div class="param-field">
+                            <label class="trail-checkbox-label">
+                                <input type="checkbox" id="sg-trail-sl"> Enable Trail SL
+                            </label>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Trail Step (pts)</label>
+                            <input type="number" id="sg-trail-step" class="param-input" value="10" step="1" min="1">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-preview">
+                    <div class="preview-title">📋 Order Preview</div>
+                    <div class="preview-legs">
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="sg-ce-desc">— CE (OTM)</span>
+                            <span class="leg-ltp" id="sg-ce-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="sg-pe-desc">— PE (OTM)</span>
+                            <span class="leg-ltp" id="sg-pe-ltp">LTP: —</span>
+                        </div>
+                    </div>
+                    <div class="preview-premium">
+                        Total Premium: <strong id="sg-total-premium">—</strong>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="strat-btn btn-preview" onclick="previewStrategy('strangle')">👁 Preview</button>
+                    <button class="strat-btn btn-deploy"  onclick="deployStrategy('strangle')">🚀 Deploy</button>
+                </div>
+            </div><!-- /strangle -->
+
+
+            <!-- ─── BULL CALL SPREAD ─── -->
+            <div class="strategy-card" id="card-bull-spread">
+                <div class="card-header">
+                    <div class="card-icon">📈</div>
+                    <div class="card-meta">
+                        <div class="card-name">Bull Call Spread</div>
+                        <div class="card-subtitle">Buy lower CE + Sell higher CE</div>
+                    </div>
+                    <div class="card-badge badge-bullish">Bullish</div>
+                </div>
+                <div class="card-params">
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Underlying</label>
+                            <select id="bc-underlying" class="param-select" onchange="loadStrikes('bc')">
+                                <option value="26000">NIFTY</option><option value="26009">BANKNIFTY</option>
+                                <option value="26013">FINNIFTY</option><option value="26037">MIDCPNIFTY</option>
+                                <option value="1">SENSEX</option><option value="12">BANKEX</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Expiry</label>
+                            <select id="bc-expiry-type" class="param-select" onchange="loadStrikes('bc')">
+                                <option value="nearest">Nearest</option><option value="next">Next Nearest</option>
+                            </select>
+                        </div>
+                        <div class="param-field expiry-field">
+                            <label class="param-label">&nbsp;</label>
+                            <span class="expiry-display" id="bc-expiry-label">—</span>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Buy CE Strike (lower)</label>
+                            <select id="bc-buy-strike" class="param-select"></select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Sell CE Strike (higher)</label>
+                            <select id="bc-sell-strike" class="param-select"></select>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Lots</label>
+                            <input type="number" id="bc-lots" class="param-input" value="1" min="1">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Order Type</label>
+                            <select id="bc-order-type" class="param-select">
+                                <option value="MKT">Market</option><option value="L">Limit</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Limit Price</label>
+                            <input type="number" id="bc-limit-price" class="param-input" value="0" step="0.05">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-preview">
+                    <div class="preview-title">📋 Order Preview</div>
+                    <div class="preview-legs">
+                        <div class="preview-leg leg-buy">
+                            <span class="leg-action buy">BUY</span>
+                            <span class="leg-desc" id="bc-buy-desc">— CE (lower)</span>
+                            <span class="leg-ltp" id="bc-buy-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="bc-sell-desc">— CE (higher)</span>
+                            <span class="leg-ltp" id="bc-sell-ltp">LTP: —</span>
+                        </div>
+                    </div>
+                    <div class="preview-premium">
+                        Net Debit: <strong id="bc-net-debit">—</strong> &nbsp;|&nbsp;
+                        Max Profit: <strong id="bc-max-profit">—</strong>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="strat-btn btn-preview" onclick="previewStrategy('bull_spread')">👁 Preview</button>
+                    <button class="strat-btn btn-deploy"  onclick="deployStrategy('bull_spread')">🚀 Deploy</button>
+                </div>
+            </div><!-- /bull spread -->
+
+
+            <!-- ─── BEAR PUT SPREAD ─── -->
+            <div class="strategy-card" id="card-bear-spread">
+                <div class="card-header">
+                    <div class="card-icon">📉</div>
+                    <div class="card-meta">
+                        <div class="card-name">Bear Put Spread</div>
+                        <div class="card-subtitle">Buy higher PE + Sell lower PE</div>
+                    </div>
+                    <div class="card-badge badge-bearish">Bearish</div>
+                </div>
+                <div class="card-params">
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Underlying</label>
+                            <select id="bp-underlying" class="param-select" onchange="loadStrikes('bp')">
+                                <option value="26000">NIFTY</option><option value="26009">BANKNIFTY</option>
+                                <option value="26013">FINNIFTY</option><option value="26037">MIDCPNIFTY</option>
+                                <option value="1">SENSEX</option><option value="12">BANKEX</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Expiry</label>
+                            <select id="bp-expiry-type" class="param-select" onchange="loadStrikes('bp')">
+                                <option value="nearest">Nearest</option><option value="next">Next Nearest</option>
+                            </select>
+                        </div>
+                        <div class="param-field expiry-field">
+                            <label class="param-label">&nbsp;</label>
+                            <span class="expiry-display" id="bp-expiry-label">—</span>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Buy PE Strike (higher)</label>
+                            <select id="bp-buy-strike" class="param-select"></select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Sell PE Strike (lower)</label>
+                            <select id="bp-sell-strike" class="param-select"></select>
+                        </div>
+                    </div>
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Lots</label>
+                            <input type="number" id="bp-lots" class="param-input" value="1" min="1">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Order Type</label>
+                            <select id="bp-order-type" class="param-select">
+                                <option value="MKT">Market</option><option value="L">Limit</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Limit Price</label>
+                            <input type="number" id="bp-limit-price" class="param-input" value="0" step="0.05">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-preview">
+                    <div class="preview-title">📋 Order Preview</div>
+                    <div class="preview-legs">
+                        <div class="preview-leg leg-buy">
+                            <span class="leg-action buy">BUY</span>
+                            <span class="leg-desc" id="bp-buy-desc">— PE (higher)</span>
+                            <span class="leg-ltp" id="bp-buy-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="bp-sell-desc">— PE (lower)</span>
+                            <span class="leg-ltp" id="bp-sell-ltp">LTP: —</span>
+                        </div>
+                    </div>
+                    <div class="preview-premium">
+                        Net Debit: <strong id="bp-net-debit">—</strong> &nbsp;|&nbsp;
+                        Max Profit: <strong id="bp-max-profit">—</strong>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="strat-btn btn-preview" onclick="previewStrategy('bear_spread')">👁 Preview</button>
+                    <button class="strat-btn btn-deploy"  onclick="deployStrategy('bear_spread')">🚀 Deploy</button>
+                </div>
+            </div><!-- /bear spread -->
+
+
+            <!-- ─── IRON CONDOR (wide card) ─── -->
+            <div class="strategy-card strategy-card-wide" id="card-iron-condor">
+                <div class="card-header">
+                    <div class="card-icon">🦅</div>
+                    <div class="card-meta">
+                        <div class="card-name">Iron Condor</div>
+                        <div class="card-subtitle">Sell strangle + Buy wings for protection</div>
+                    </div>
+                    <div class="card-badge badge-neutral">Neutral</div>
+                </div>
+                <div class="card-params">
+                    <div class="param-row">
+                        <div class="param-field">
+                            <label class="param-label">Underlying</label>
+                            <select id="ic-underlying" class="param-select" onchange="loadStrikes('ic')">
+                                <option value="26000">NIFTY</option><option value="26009">BANKNIFTY</option>
+                                <option value="26013">FINNIFTY</option><option value="26037">MIDCPNIFTY</option>
+                                <option value="1">SENSEX</option><option value="12">BANKEX</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Expiry</label>
+                            <select id="ic-expiry-type" class="param-select" onchange="loadStrikes('ic')">
+                                <option value="nearest">Nearest</option><option value="next">Next Nearest</option>
+                            </select>
+                        </div>
+                        <div class="param-field expiry-field">
+                            <label class="param-label">&nbsp;</label>
+                            <span class="expiry-display" id="ic-expiry-label">—</span>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Lots</label>
+                            <input type="number" id="ic-lots" class="param-input" value="1" min="1">
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Order Type</label>
+                            <select id="ic-order-type" class="param-select">
+                                <option value="MKT">Market</option><option value="L">Limit</option>
+                            </select>
+                        </div>
+                        <div class="param-field">
+                            <label class="param-label">Limit Price</label>
+                            <input type="number" id="ic-limit-price" class="param-input" value="0" step="0.05">
+                        </div>
+                    </div>
+                    <div class="param-row ic-strikes-row">
+                        <div class="ic-leg-group">
+                            <div class="ic-leg-label buy-label">BUY PE (wing)</div>
+                            <select id="ic-buy-pe" class="param-select"></select>
+                        </div>
+                        <div class="ic-leg-group">
+                            <div class="ic-leg-label sell-label">SELL PE</div>
+                            <select id="ic-sell-pe" class="param-select"></select>
+                        </div>
+                        <div class="ic-arrow">◀── ATM ──▶</div>
+                        <div class="ic-leg-group">
+                            <div class="ic-leg-label sell-label">SELL CE</div>
+                            <select id="ic-sell-ce" class="param-select"></select>
+                        </div>
+                        <div class="ic-leg-group">
+                            <div class="ic-leg-label buy-label">BUY CE (wing)</div>
+                            <select id="ic-buy-ce" class="param-select"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-preview">
+                    <div class="preview-title">📋 Order Preview</div>
+                    <div class="preview-legs ic-preview-legs">
+                        <div class="preview-leg leg-buy">
+                            <span class="leg-action buy">BUY</span>
+                            <span class="leg-desc" id="ic-buy-pe-desc">— PE</span>
+                            <span class="leg-ltp" id="ic-buy-pe-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="ic-sell-pe-desc">— PE</span>
+                            <span class="leg-ltp" id="ic-sell-pe-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-sell">
+                            <span class="leg-action sell">SELL</span>
+                            <span class="leg-desc" id="ic-sell-ce-desc">— CE</span>
+                            <span class="leg-ltp" id="ic-sell-ce-ltp">LTP: —</span>
+                        </div>
+                        <div class="preview-leg leg-buy">
+                            <span class="leg-action buy">BUY</span>
+                            <span class="leg-desc" id="ic-buy-ce-desc">— CE</span>
+                            <span class="leg-ltp" id="ic-buy-ce-ltp">LTP: —</span>
+                        </div>
+                    </div>
+                    <div class="preview-premium">
+                        Net Premium: <strong id="ic-net-premium">—</strong> &nbsp;|&nbsp;
+                        Max Profit: <strong id="ic-max-profit">—</strong> &nbsp;|&nbsp;
+                        Max Loss: <strong id="ic-max-loss">—</strong>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="strat-btn btn-preview" onclick="previewStrategy('iron_condor')">👁 Preview</button>
+                    <button class="strat-btn btn-deploy"  onclick="deployStrategy('iron_condor')">🚀 Deploy</button>
+                </div>
+            </div><!-- /iron condor -->
+
+        </div><!-- /strategy-grid -->
+    </div><!-- /deploy-tab -->
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 3 — ACTIVE STRATEGIES
+         ═══════════════════════════════════════════════════════ -->
+    <div id="active-tab" class="strat-tab-content">
+
+        <!-- Summary chips — matches positions status bar pattern -->
+        <div class="active-summary-bar">
+            <div class="as-card">
+                <div class="as-label">Running</div>
+                <div class="as-value neutral" id="asRunningCount">0</div>
+            </div>
+            <div class="as-card">
+                <div class="as-label">Total MTM P&amp;L</div>
+                <div class="as-value" id="asTotalPnL">₹0.00</div>
+            </div>
+            <div class="as-card">
+                <div class="as-label">Premium Collected</div>
+                <div class="as-value neutral" id="asPremiumTotal">₹0.00</div>
+            </div>
+            <div class="as-card">
+                <div class="as-label">Open Legs</div>
+                <div class="as-value neutral" id="asOpenLegs">0</div>
+            </div>
+        </div>
+
+        <!-- Table — matches positions table exactly -->
+        <div class="active-strat-table-wrap">
+            <table class="active-strat-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Strategy</th>
+                        <th>Underlying</th>
+                        <th>Expiry</th>
+                        <th class="num">Legs</th>
+                        <th class="num">Lots</th>
+                        <th class="num">Premium</th>
+                        <th class="num">MTM P&amp;L</th>
+                        <th>SL Hit</th>
+                        <th>Deployed At</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="activeStratBody">
+                    <tr>
+                        <td colspan="12" class="no-data">
+                            No active strategies. Deploy one from the Deploy tab.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Expanded legs panel (injected dynamically) -->
+        <div id="stratLegsPanel" class="strat-legs-panel" style="display:none;"></div>
+
+    </div><!-- /active-tab -->
+
+</div><!-- /strat-container -->
+
+
+<!-- ════════════════════════════════════════════════════════
+     DEPLOY CONFIRMATION MODAL
+     ════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="deployModal" onclick="closeDeployModal()">
+    <div class="modal-box deploy-modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-header-left">
+                <span id="deployModalTitle">🚀 Deploy Strategy</span>
+                <span id="deployModalUser" class="sq-user-badge badge-old">client1</span>
+            </div>
+            <button class="modal-close" onclick="closeDeployModal()">✕</button>
+        </div>
+        <div class="modal-body-inner">
+            <table class="sq-review-table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>Symbol</th><th>Action</th>
+                        <th>Lots</th><th>Qty</th><th>Order Type</th>
+                        <th>Price</th><th>LTP</th>
+                    </tr>
+                </thead>
+                <tbody id="deployReviewBody"></tbody>
+            </table>
+            <div class="deploy-sl-row" id="deploySlRow" style="display:none;"></div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-cancel"  onclick="closeDeployModal()">Cancel</button>
+                <button class="modal-btn modal-confirm" id="btnConfirmDeploy" onclick="confirmDeploy()">✅ Confirm &amp; Execute</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     PANIC SWITCH MODAL
+     ════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="panicModal" onclick="closePanicModal()">
+    <div class="modal-box panic-modal-box" onclick="event.stopPropagation()">
+        <div class="panic-header">
+            <div class="panic-icon">🚨</div>
+            <h2>PANIC SWITCH</h2>
+            <p>This will <strong>cancel ALL pending orders</strong> and <strong>square off ALL positions</strong> across NSE_FO &amp; BSE_FO.</p>
+        </div>
+        <div class="panic-user-select">
+            <label>Execute for:</label>
+            <select id="panicUserSelect" class="param-select">
+                <option value="client1">Client 1</option>
+                <option value="client2">Client 2</option>
+                <option value="both">⚠️ BOTH USERS</option>
+            </select>
+        </div>
+        <div class="panic-confirm-text">
+            Type <strong>PANIC</strong> to confirm:
+            <input type="text" id="panicConfirmInput" class="param-input"
+                   placeholder="Type PANIC here" oninput="validatePanicInput(this)">
+        </div>
+        <div class="panic-actions">
+            <button class="modal-btn modal-cancel"     onclick="closePanicModal()">Abort</button>
+            <button class="modal-btn panic-execute-btn" id="btnPanicExecute" disabled onclick="executePanic()">
+                🚨 EXECUTE PANIC
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="stratToast"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/strategy.js') }}"></script>
+{% endblock %}

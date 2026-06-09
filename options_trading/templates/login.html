@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Options Trading v3.1</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            
+            <div class="login-header">
+                <h1>📊 Options Trading v3.1</h1>
+                <p>Select your account and index to begin trading</p>
+            </div>
+            
+            <div class="login-form">
+                
+                <!-- Index Selection -->
+                <div class="form-group">
+                    <label for="indexSelect">Select Index:</label>
+                    <select id="indexSelect" class="form-select">
+                        <option value="1">SENSEX (1)</option>
+                        <option value="26000" selected>NIFTY (26000)</option>
+                        <option value="26009">BANKNIFTY (26009)</option>
+                    </select>
+                </div>
+                
+                <!-- Account Selection -->
+                <div class="form-group">
+                    <label for="accountSelect">Select Account:</label>
+                    <select id="accountSelect" class="form-select">
+                        <option value="client1">Client 1</option>
+                        <option value="client2">Client 2</option>
+                        <option value="both" s
+                        elected>Both Accounts</option>
+                    </select>
+                </div>
+                
+                <!-- New User 2FA Code Input -->
+                <div class="form-group" id="newtwofaGroup">
+                    <label for="newtwofaInput">Enter 2FA Code for Client 1:</label>
+                    <input 
+                        type="text" 
+                        id="newtwofaInput" 
+                        class="form-input" 
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                    >
+                </div>
+                
+                <!-- Old User 2FA Code Input -->
+                <div class="form-group" id="oldtwofaGroup">
+                    <label for="oldtwofaInput">Enter 2FA Code for Client 2:</label>
+                    <input 
+                        type="text" 
+                        id="oldtwofaInput" 
+                        class="form-input" 
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                    >
+                </div>
+                
+                <!-- Confirmation Checkbox -->
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="confirmCheck" class="form-checkbox">
+                    <label for="confirmCheck" class="checkbox-label">
+                        I confirm I want to trade with the selected index
+                    </label>
+                </div>
+                
+                <!-- Login Button -->
+                <button class="login-button" onclick="handleLogin()">
+                    🔐 Login
+                </button>
+                
+            </div>
+            
+            <div class="login-footer">
+                <p>Version 3.1 - Clean Start</p>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Loading Modal -->
+    <div class="loading-modal" id="loadingModal">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h2 id="loadingMessage">Logging in...</h2>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

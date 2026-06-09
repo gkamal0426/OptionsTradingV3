@@ -1,0 +1,882 @@
+/* ===================================
+   Common Styles - Navigation Bar
+   =================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f7fafc;
+    min-height: 100vh;
+}
+
+/* Main Navigation Bar */
+.main-nav {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+    padding: 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 70px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.nav-center {
+    display: flex;
+    gap: 5px;
+}
+
+.nav-link {
+    padding: 10px 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-bottom: 3px solid #667eea;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-user-select {
+    padding: 8px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.nav-user-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-user-select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.nav-logout {
+    background: #f56565;
+    color: white;
+}
+
+.nav-logout:hover {
+    background: #e53e3e;
+    transform: scale(1.05);
+}
+
+/* Main Content Area */
+.main-content {
+    padding: 20px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .main-nav {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 15px 20px;
+    }
+    
+    .nav-center {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+}
+/* ===================================
+   Actions Dropdown Menu — shared across all pages
+   =================================== */
+
+.actions-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.actions-menu-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.actions-menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.actions-menu-btn:active {
+    transform: translateY(0);
+}
+
+.actions-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 110%;
+    background: white;
+    width: max-content;
+    min-width: 220px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    z-index: 2000;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.actions-dropdown-content.show {
+    display: block;
+}
+
+.actions-dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #2d3748;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    border-bottom: 1px solid #f7fafc;
+}
+
+.actions-dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.actions-dropdown-content a:hover {
+    background: linear-gradient(90deg, #f7fafc 0%, #edf2f7 100%);
+    padding-left: 24px;
+}
+
+.dropdown-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.actions-dropdown-content a:nth-child(1):hover {
+    background: linear-gradient(90deg, #fff5f5 0%, #fed7d7 100%);
+    color: #c53030;
+}
+
+.actions-dropdown-content a:nth-child(2):hover {
+    background: linear-gradient(90deg, #f0f4ff 0%, #e0e7ff 100%);
+    color: #5568d3;
+}
+
+.actions-dropdown-content a:nth-child(3):hover {
+    background: linear-gradient(90deg, #f0fdf4 0%, #d1fae5 100%);
+    color: #059669;
+}
+
+.actions-dropdown-content a:nth-child(4):hover {
+    background: linear-gradient(90deg, #faf5ff 0%, #ede9fe 100%);
+    color: #7c3aed;
+}
+
+.actions-dropdown-content a:nth-child(5):hover {
+    background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
+    color: #d97706;
+}
+
+.actions-dropdown-content a:nth-child(6):hover {
+    background: linear-gradient(90deg, #f0fdfa 0%, #ccfbf1 100%);
+    color: #0f766e;
+}
+
+.actions-dropdown-content a:nth-child(7):hover {
+    background: linear-gradient(90deg, #fdf4ff 0%, #f3e8ff 100%);
+    color: #9333ea;
+}
+
+@media (max-width: 768px) {
+    .actions-dropdown-content {
+        right: auto;
+        left: 0;
+    }
+}
+
+/* Accent style for the last dropdown item (7th — MCX download) */
+.actions-dropdown-content a:last-child {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 4px;
+    padding-top: 10px;
+    color: #a78bfa;
+}
+.actions-dropdown-content a:last-child:hover {
+    background: rgba(167, 139, 250, 0.12);
+    color: #c4b5fd;
+}
+
+
+/* ===================================
+   Orders Modal — shared (moved from dashboard.css)
+   =================================== */
+
+/* ===================================
+   Orders Modal
+   =================================== */
+
+.orders-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 4000;
+    animation: fadeIn 0.3s;
+}
+
+.orders-content {
+    background: white;
+    border-radius: 16px;
+    max-width: 1400px;
+    width: 95%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s;
+}
+
+.orders-header {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.orders-header h2 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.orders-close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.orders-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.orders-controls {
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f7fafc;
+}
+
+.orders-user-select {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.orders-user-select label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 14px;
+}
+
+.orders-dropdown {
+    padding: 8px 16px;
+    border: 2px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: #2d3748;
+    transition: all 0.2s;
+}
+
+.orders-dropdown:hover {
+    border-color: #667eea;
+}
+
+.orders-dropdown:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.orders-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn:hover {
+    border-color: #667eea;
+    background: #f7fafc;
+}
+
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.orders-table-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 30px;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.orders-table thead {
+    background: #edf2f7;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.orders-table th {
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #4a5568;
+    border-bottom: 2px solid #cbd5e0;
+}
+
+.orders-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 12px;
+}
+
+.orders-table tbody tr:hover {
+    background: #f7fafc;
+}
+
+.order-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.order-status-success {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.order-status-rejected {
+    background: #fed7d7;
+    color: #742a2a;
+}
+
+.order-status-pending {
+    background: #feebc8;
+    color: #7c2d12;
+}
+
+.order-status-na {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.trans-type-buy {
+    color: #48bb78;
+    font-weight: 700;
+}
+
+.trans-type-sell {
+    color: #f56565;
+    font-weight: 700;
+}
+
+.order-type-mkt {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.order-type-limit {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.order-number {
+    font-family: monospace;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.order-reason {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #718096;
+    font-size: 11px;
+}
+
+.order-reason:hover {
+    white-space: normal;
+    overflow: visible;
+}
+
+.orders-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.orders-summary {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 14px;
+}
+
+.orders-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.orders-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.orders-btn-refresh {
+    background: #667eea;
+    color: white;
+}
+
+.orders-btn-refresh:hover {
+    background: #5568d3;
+}
+
+.orders-btn-close {
+    background: #e2e8f0;
+    color: #2d3748;
+}
+
+.orders-btn-close:hover {
+    background: #cbd5e0;
+}
+
+
+
+
+/* =============================================================
+   DIRECT STRIKE ADD MODAL  — append to dashboard.css
+   ============================================================= */
+
+/* Overlay backdrop */
+.dsa-overlay {
+    display: none;                        /* toggled to flex by JS */
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    align-items: center;
+    justify-content: center;
+    animation: dsaFadeIn 0.18s ease;
+}
+.dsa-overlay.active {
+    display: flex;
+}
+
+@keyframes dsaFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Modal card */
+.dsa-modal {
+    background: #1e2130;
+    border: 1px solid #2e3350;
+    border-radius: 14px;
+    width: 500px;
+    max-width: calc(100vw - 32px);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    animation: dsaSlideUp 0.2s ease;
+    overflow: hidden;
+}
+
+@keyframes dsaSlideUp {
+    from { transform: translateY(28px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Header */
+.dsa-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #2e3350;
+    background: #5a5fcf;
+}
+.dsa-header-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.dsa-title {
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: 0.3px;
+}
+.dsa-close-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+.dsa-close-btn:hover {
+    color: #f1f5f9;
+    background: #2e3350;
+}
+
+/* Body */
+.dsa-body {
+    padding: 20px 20px 16px;
+    background: #ffffff;   /* ← add this line */
+}
+.dsa-description {
+    font-size: 13px;
+    color: #374151;   /* for black background matching #94a3b8 */
+    margin: 0 0 18px;
+    line-height: 1.55;
+}
+
+/* Input row — strike + option type side by side */
+.dsa-input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+.dsa-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dsa-field-strike {
+    flex: 1;               /* takes remaining width */
+}
+.dsa-field-type {
+    flex-shrink: 0;
+    width: 100px;
+}
+
+/* Label */
+.dsa-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4f46e5;   /* was #667eea — slightly deeper so it shows on white */
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+/* Strike text input */
+.dsa-input {
+    background: #ffffff;   /* was #111420 */
+    border: 1px solid #d1d5db;   /* was #2e3350 */
+    border-radius: 8px;
+    color: #111827;   /* was #e2e8f0 */
+    font-size: 15px;
+    font-weight: 600;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    width: 100%;
+    box-sizing: border-box;
+    /* hide number spin buttons */
+    -moz-appearance: textfield;
+}
+.dsa-input::-webkit-outer-spin-button,
+.dsa-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.dsa-input::placeholder {
+    color: #9ca3af;   /* was #4a5568 */
+    font-weight: 400;
+}
+.dsa-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.18);
+}
+.dsa-input.dsa-input-error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* CE / PE select */
+.dsa-select {
+    background: #ffffff;   /* was #111420 */
+    border: 1px solid #d1d5db;   /* was #2e3350 */
+    border-radius: 8px;
+    color: #111827;   /* was #e2e8f0 */
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 12px;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    /* custom arrow */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+    padding-right: 28px;
+}
+.dsa-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.18);
+}
+/* Colour CE green, PE red in the dropdown */
+.dsa-select option[value="CE"] { color: #34d399; }
+.dsa-select option[value="PE"] { color: #f87171; }
+
+/* Inline status / feedback */
+.dsa-status {
+    min-height: 22px;
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    padding: 0 2px;
+    transition: opacity 0.2s;
+}
+.dsa-status.success {
+    color: #34d399;
+}
+.dsa-status.error {
+    color: #f87171;
+}
+.dsa-status.loading {
+    color: #4f46e5;   /* was #667eea */
+}
+
+/* Footer */
+.dsa-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px 18px;
+    border-top: 1px solid #dbeafe;   /* was #2e3350 */
+    background: #eff6ff;   /* was #181b27 */
+}
+
+/* Shared button base */
+
+
+.dsa-btn {
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.dsa-btn:active { transform: scale(0.97); }
+.dsa-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Cancel */
+
+.dsa-btn-cancel {
+    background: #2e3350;
+    color: #94a3b8;
+    min-width: 130px;
+    justify-content: center;
+}
+
+.dsa-btn-cancel:hover:not(:disabled) {
+    background: #3a4170;
+    color: #e2e8f0;
+}
+
+/* Add — accent gradient */
+.dsa-btn-add {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.35);
+    min-width: 130px;
+    justify-content: center;
+}
+.dsa-btn-add:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    opacity: 0.92;
+}
+
+/* Inline loading spinner inside Add button */
+.dsa-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: dsaSpin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+@keyframes dsaSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* =============================================================
+   Highlight the new dropdown item slightly differently
+   ============================================================= */
+.actions-dropdown-content a:last-child {
+    border-top: 1px solid #2e3350;
+    margin-top: 4px;
+    padding-top: 10px;
+    color: #a78bfa;   /* soft violet accent to signal "new" */
+}
+.actions-dropdown-content a:last-child:hover {
+    background: rgba(167, 139, 250, 0.12);
+    color: #c4b5fd;
+}
+
+.dsa-btn-del {
+    background: #dc2626;
+    color: #fff;
+    min-width: 130px;
+    justify-content: center;
+}
+.dsa-btn-del:hover:not(:disabled) {
+    background: #b91c1c;
+    opacity: 0.92;
+}
