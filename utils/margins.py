@@ -1,6 +1,7 @@
 import logging
 from utils.safe_variables import _float
 
+
 def get_margin_details(user):
     with user.margin_lock:
         tot_mar = 0
