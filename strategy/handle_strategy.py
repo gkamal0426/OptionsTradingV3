@@ -11,6 +11,7 @@ from strategy.helper_stoploss_monitor import SLMonitor
 from strategy.helper_panic import PanicHelper
 from utils.decorators import login_required
 
+
 class StrategyHelper:
 
     def __init__(self):
