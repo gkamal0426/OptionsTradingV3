@@ -1,28 +1,19 @@
-/**
- * ===================================
- * Common Functions - Shared Across Pages
- * ===================================
- */
 
-/**
- * Handle global user change (affects all pages)
- */
+
 function handleGlobalUserChange() {
     const selectedUser = document.getElementById('globalUserSelect').value;
     console.log('Global user changed to:', selectedUser);
     
-    // Store in sessionStorage to persist across pages
+    
     sessionStorage.setItem('currentUser', selectedUser);
     
-    // Reload current page data with new user
+    
     if (typeof refreshPageData === 'function') {
         refreshPageData(selectedUser);
     }
 }
 
-/**
- * Handle global logout
- */
+
 async function handleGlobalLogout() {
     if (confirm('Are you sure you want to logout?')) {
         try {
@@ -33,20 +24,18 @@ async function handleGlobalLogout() {
             
             const result = await response.json();
             
-            // Redirect to login page
+            
             window.location.href = '/';
             
         } catch (error) {
             console.error('Logout error:', error);
-            // Force redirect anyway
+            
             window.location.href = '/';
         }
     }
 }
 
-/**
- * Get current user from global selector or sessionStorage
- */
+
 function getCurrentUser() {
     const selector = document.getElementById('globalUserSelect');
     if (selector) {
@@ -55,9 +44,7 @@ function getCurrentUser() {
     return sessionStorage.getItem('currentUser') || 'client1';
 }
 
-/**
- * Initialize global user selector on page load
- */
+
 window.addEventListener('DOMContentLoaded', function() {
     const savedUser = sessionStorage.getItem('currentUser');
     if (savedUser) {
@@ -68,18 +55,14 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-/**
- * ===================================
- * Actions Dropdown — shared across all pages
- * ===================================
- */
+
 
 function toggleActionsMenu() {
     const dropdown = document.getElementById('actionsDropdown');
     if (dropdown) dropdown.classList.toggle('show');
 }
 
-// Close the dropdown when clicking anywhere outside the button
+
 window.addEventListener('click', function(event) {
     if (!event.target.matches('.actions-menu-btn')) {
         const dropdowns = document.getElementsByClassName('actions-dropdown-content');
@@ -91,16 +74,13 @@ window.addEventListener('click', function(event) {
     }
 });
 
-/** Utility: close the Actions dropdown */
+
 function _closeActionsDropdown() {
     const dd = document.getElementById('actionsDropdown');
     if (dd) dd.classList.remove('show');
 }
 
-/**
- * Shared modal helper used by action handlers.
- * Falls back gracefully if the page has its own showModal.
- */
+
 function _showActionResult(message, status) {
     if (typeof showModal === 'function') {
         showModal(message, status || 'info');
