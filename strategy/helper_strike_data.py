@@ -1,6 +1,3 @@
-# ═══════════════════════════════════════════════════════════════════════════════
-# STRIKE DATA HELPER
-# ═══════════════════════════════════════════════════════════════════════════════
 
 from utils.safe_variables import _float, _int, _epoch_to_expiry_str
 import logging
