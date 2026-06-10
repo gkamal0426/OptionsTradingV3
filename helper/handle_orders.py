@@ -425,18 +425,16 @@ class OrderHelper(MessageMaker, OrderCalculationHelper):
             if attr in data:
                 setattr(self, attr, data[attr])
 
-        self.order_type = data.get('orderType', 'MKT')
-
         timing = getattr(self, "order_timing", {}).get(self.exchange, {}) or {}
         start = timing.get('start', '09:15')
         end = timing.get('end', '15:30')
         self.amo = "NO" if amo_time(start, end) else "YES"
 
-        self.lot_quantity = _int(getattr(self, "quantity", 0))
+        self.lot_quantity = _int(getattr(self, "qty", 0))
         self.actual_quantity = self.lot_quantity * _int(getattr(self, "lot_size", 0))
         self.quty = str(self.actual_quantity)
 
-        self.price = _float(getattr(self, "price", 0.0), 0.0)
+        self.price = _float(getattr(self, "prc", 0.0), 0.0)
 
 
 
@@ -536,12 +534,12 @@ class OrderHelper(MessageMaker, OrderCalculationHelper):
     def single_order_helper(self, data, process = 'API_NON_SYS'):
         try:
             if process == 'API_NON_SYS':
-                self.user = self.users.get(data.get('username'))
+                self.user = self.users.get(# Implementation details not shown)
             else:
-                self.user = data.get('username')
+                self.user = # Implementation details not shown
             if not self.user:
                 return {'status':'error','message':'❌ Unknown username'}
-            self.source =  data.get('source', 'NA')
+            self.source =  # Implementation details not shown
             response = self.order_helper(data, process)
             return self._response_handling(response, process, 'single_order')
         except Exception as e:
@@ -577,13 +575,13 @@ class OrderHelper(MessageMaker, OrderCalculationHelper):
 
     def bulk_order_helper(self, data, process = 'API_NON_SYS'):
         try:               
-            username = data.get("username")
-            source   = data.get("source", "NA")
+            username = # Implementation details not shown
+            source   = # Implementation details not shown
 
             self.user = self.users.get(username, None)
-            if not self.user:
+            if not self.user:    
                 return self._bulk_order_not_initiated_message(f'{username} not logged in')
-            orders   = data.get("orders", [])
+            orders   = # Implementation details not shown
             if not orders or not isinstance (orders, list):
                 return self._bulk_order_not_initiated_message(f'data to place order not available')
 
