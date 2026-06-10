@@ -2,14 +2,14 @@
 //  analytics.js  —  Analytics page
 // ═══════════════════════════════════════════════
 
-// ── Shared state ────────────────────────────────
-let _pcrData         = null;   // cached after every load
-let _currentStrikeRow = null;  // PCR strike modal
-let _currentOicRow    = null;  // OIC strike modal
-let _oicChart         = null;  // Chart.js instance — destroyed before re-render
-let _dirMap           = {};    // populated from /api/config/pcr
 
-// ── Init ────────────────────────────────────────
+let _pcrData         = null;   
+let _currentStrikeRow = null;  
+let _currentOicRow    = null;  
+let _oicChart         = null;  
+let _dirMap           = {};    
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('dateFilter').value = new Date().toISOString().split('T')[0];
     await loadPcrConfig();
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 30000);
 });
 
-// ── Config from YAML via Flask ───────────────────
+
 async function loadPcrConfig() {
     try {
         const res  = await fetch('/api/config/pcr');
@@ -39,7 +39,7 @@ async function loadPcrConfig() {
     }
 }
 
-// ── Page tab switching ───────────────────────────
+
 function switchAnaTab(index) {
     document.querySelectorAll('.ana-tab-btn').forEach((b, i) =>
         b.classList.toggle('active', i === index));
@@ -49,9 +49,7 @@ function switchAnaTab(index) {
     if (index === 1 && _pcrData) renderOicTab(_pcrData);
 }
 
-// ═══════════════════════════════════════════════
-//  PCR — TAB 0
-// ═══════════════════════════════════════════════
+
 
 async function loadPCR(silent = false) {
     const date  = document.getElementById('dateFilter').value;
@@ -82,7 +80,7 @@ async function loadPCR(silent = false) {
         renderPcrTable(_pcrData);
         document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
 
-        // Refresh OIC tab too if it's visible
+        
         const oicPanel = document.getElementById('anaPanel1');
         if (oicPanel?.classList.contains('active')) renderOicTab(_pcrData);
 
@@ -169,9 +167,7 @@ function renderPcrTable(data) {
     }).join('');
 }
 
-// ═══════════════════════════════════════════════
-//  PCR — STRIKE DETAIL MODAL (Tab 0)
-// ═══════════════════════════════════════════════
+
 
 function openStrikeModal(row) {
     _currentStrikeRow = row;
@@ -210,9 +206,7 @@ function switchStrikeTab(index) {
     if (index === 1 && _currentStrikeRow) renderOiChart(_currentStrikeRow.strikes || []);
 }
 
-// ═══════════════════════════════════════════════
-//  PCR — OI BAR CHART (pure SVG, no dependencies)
-// ═══════════════════════════════════════════════
+
 
 function renderOiChart(strikes) {
     const container = document.getElementById('strikeOiChart');
@@ -273,9 +267,7 @@ function renderOiChart(strikes) {
     });
 }
 
-// ═══════════════════════════════════════════════
-//  OI CHANGE — TAB 1
-// ═══════════════════════════════════════════════
+
 
 function renderOicTab(data) {
     if (!data?.length) return;
@@ -284,7 +276,7 @@ function renderOicTab(data) {
     document.getElementById('oicLastUpdate').textContent = new Date().toLocaleTimeString();
 }
 
-// ── OIC Summary Strip ────────────────────────────
+
 function renderOicSummary(data) {
     const last = data[data.length - 1];
     const cc   = last.call_oi_change ?? null;
@@ -302,11 +294,11 @@ function renderOicSummary(data) {
     setChg('oicSumPutChg',  pc);
     setChg('oicSumNetChg',  net);
 
-    // Net highlight colour
+    
     const netEl = document.getElementById('oicSumNetChg');
     if (netEl) netEl.style.fontWeight = '800';
 
-    // Top builders from latest reading's strikes
+    
     const { topCe, topPe } = getTopBuilders(last.strikes || []);
 
     const ceStrikeEl = document.getElementById('oicSumCeStrike');
@@ -340,7 +332,7 @@ function renderOicSummary(data) {
     document.getElementById('oicLiveSummary').style.display = 'flex';
 }
 
-// ── OIC History Table ────────────────────────────
+
 function renderOicTable(data) {
     const tbody = document.getElementById('oicTableBody');
     if (!tbody) return;
@@ -367,7 +359,7 @@ function renderOicTable(data) {
     }).join('');
 }
 
-// ── Top builders helper ──────────────────────────
+
 function getTopBuilders(strikes) {
     let topCe = null, topPe = null;
     for (const s of strikes) {
@@ -379,9 +371,7 @@ function getTopBuilders(strikes) {
     return { topCe, topPe };
 }
 
-// ═══════════════════════════════════════════════
-//  OIC — STRIKE OI CHANGE MODAL
-// ═══════════════════════════════════════════════
+
 
 function openOicModal(row) {
     _currentOicRow = row;
@@ -427,9 +417,7 @@ function switchOicTab(index) {
     if (index === 1 && _currentOicRow) renderOicChangeChart(_currentOicRow.strikes || []);
 }
 
-// ═══════════════════════════════════════════════
-//  OIC — CHANGE BAR CHART  (Chart.js)
-// ═══════════════════════════════════════════════
+
 
 function renderOicChangeChart(strikes) {
     const canvas = document.getElementById('oicChartCanvas');
@@ -437,7 +425,7 @@ function renderOicChangeChart(strikes) {
 
     if (_oicChart) { _oicChart.destroy(); _oicChart = null; }
 
-    // Group by strike ascending
+  
     const map = {};
     for (const s of strikes) {
         const k = s.strike ?? 0;
@@ -453,7 +441,7 @@ function renderOicChangeChart(strikes) {
         return;
     }
 
-    // PE = red family, CE = blue family; solid if gained, faded if shed
+    
     const peBg = keys.map(k => map[k].pe >= 0 ? '#fca5a5' : '#fee2e2');
     const peBd = keys.map(k => map[k].pe >= 0 ? '#dc2626' : '#fca5a5');
     const ceBg = keys.map(k => map[k].ce >= 0 ? '#93c5fd' : '#dbeafe');
@@ -522,15 +510,13 @@ function renderOicChangeChart(strikes) {
     });
 }
 
-// ═══════════════════════════════════════════════
-//  SHARED HELPERS
-// ═══════════════════════════════════════════════
+
 
 function dirClass(direction) {
     if (!direction) return 'unk';
     const k = direction.toLowerCase();
     if (_dirMap[k]) return _dirMap[k];
-    // Fallback if config not loaded
+    
     const d = direction.toUpperCase();
     if (d.includes('BEAR') || d.includes('WEAK'))                      return 'bear';
     if (d.includes('BULL'))                                             return 'bull';
@@ -546,7 +532,7 @@ function formatOI(val) {
     return val.toLocaleString('en-IN');
 }
 
-// formatOI without '—' fallback — for Chart.js tooltip (val is always a number)
+
 function formatOIRaw(val) {
     const abs = Math.abs(val);
     if (abs >= 1e7) return (val / 1e7).toFixed(2) + ' Cr';
