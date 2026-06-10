@@ -1,8 +1,3 @@
-
-"""
-"""
-
-import logging
 import logging
 import threading 
 import time
@@ -15,8 +10,6 @@ from utils.safe_variables import _float, _int, custom_round_b, custom_round_s, _
 from utils.margins import get_margin_details
 from variables.start_from_here import to_start_get
 from utils.communication import CallTelegram
-
-import time
 
 def amo_time(start_time, end_time):
     now = datetime.datetime.now()
@@ -427,10 +420,6 @@ class OrderHelper(MessageMaker, OrderCalculationHelper):
                 logging.error(f"Error processing order report: {e}")
 
 
-    """HERE ON TEST ORDER HELPER"""
-
-
-
     def _set_variables(self, data):
         for attr in self.resettable_variables:
             if attr in data:
@@ -615,8 +604,8 @@ class OrderHelper(MessageMaker, OrderCalculationHelper):
                 orders = user.orders_report  
                 return {'status': 'success', 'orders': orders, 'user': username}
             except Exception as e:
-                print(f"❌ Error fetching orders: {str(e)}")
-                traceback.print_exc()
+                logging.exception(f"❌ Error fetching orders: {str(e)}")
+                
                 
                 return {'status': 'error', 'message': f'Failed to fetch orders: {str(e)}', 'orders': []}
 
