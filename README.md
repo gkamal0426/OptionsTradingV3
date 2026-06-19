@@ -16,6 +16,7 @@ A professional-grade options trading dashboard built on **Kotak Neo API** with l
 ### Analytics
 - ✅ **Live PCR Monitor** — Put-Call Ratio tracked every 2 minutes - strikes count can be configured
 - ✅ **OI Change Tracking** — Call & Put OI with delta
+- ✅ **IV - GREEKS** — theta, gamma, delta calculations
 - ✅ **Market Direction Signal** — Strong Bullish to Strong Bearish 
 - ✅ **Historical OI Data** — auto-saved every 2 minutes, 9:15 AM to 3:30 PM - batch file runs to download 
 - ✅ **Auto Option Chain Backup** — zipped daily at 3:35 PM
